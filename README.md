@@ -49,12 +49,12 @@
 // 🔥 Firebase Config (এটা নিজেরটা বসাবেন)
 // ---------------------------------------
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_DOMAIN",
-    projectId: "YOUR_PROJECT",
-    storageBucket: "YOUR_BUCKET",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyBUMQNzDO6cRdRHFPYOGOBfApzuaidkw2E",
+    authDomain: "dollar-exchange-bdt.firebaseapp.com",
+    projectId: "dollar-exchange-bdt",
+    storageBucket: "dollar-exchange-bdt.firebasestorage.app",
+    messagingSenderId: "666904772438",
+    appId: "1:666904772438:web:860c9207c1a1e59a2820f7"
 };
 
 firebase.initializeApp(firebaseConfig);
