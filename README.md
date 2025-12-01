@@ -49,6 +49,9 @@ button{padding:10px 12px;border-radius:8px;border:none;cursor:pointer}
 .login-card{background:#fff;padding:24px;border-radius:10px;box-shadow:0 6px 18px rgba(2,6,23,0.1);width:100%;max-width:400px}
 .login-card h2{margin-top:0;margin-bottom:20px;text-align:center;color:#0b75ff}
 .login-card .logo{width:80px;height:80px;border-radius:8px;object-fit:cover;margin:0 auto 16px;display:block}
+.rate-display{background:#f0f7ff;padding:12px;border-radius:8px;margin-top:8px;border-left:4px solid #0b75ff}
+.rate-item{display:flex;justify-content:space-between;margin-bottom:6px}
+.rate-item:last-child{margin-bottom:0}
 @media (max-width:900px){ .grid{grid-template-columns:1fr} }
 </style>
 </head>
@@ -98,9 +101,23 @@ button{padding:10px 12px;border-radius:8px;border:none;cursor:pointer}
       </div>
     </div>
 
-    <!-- RIGHT: Quick Actions -->
+    <!-- RIGHT: Rate Display & Quick Actions -->
     <div class="card">
-      <h3>⚡ Quick Actions</h3>
+      <h3>💱 Current Exchange Rates</h3>
+      
+      <div class="rate-display">
+        <div class="rate-item">
+          <span>Payeer:</span>
+          <span><b id="showRatePayeer">—</b> BDT per 1 USD</span>
+        </div>
+        <div class="rate-item">
+          <span>Binance:</span>
+          <span><b id="showRateBinance">—</b> BDT per 1 USD</span>
+        </div>
+        <div class="small" style="margin-top:8px">Last updated: <span id="rateUpdateTime">—</span></div>
+      </div>
+      
+      <hr style="margin:14px 0">
       
       <div>
         <h4 style="margin:6px 0">Order Management</h4>
@@ -152,6 +169,7 @@ const db = firebase.firestore();
 // Global variables
 let currentUser = null;
 let ordersListener = null;
+let ratesListener = null;
 
 // DOM elements
 const adminOrdersContainer = document.getElementById('adminOrdersContainer');
@@ -163,6 +181,9 @@ const loginScreen = document.getElementById('loginScreen');
 const adminPanel = document.getElementById('adminPanel');
 const adminEmail = document.getElementById('adminEmail');
 const loginError = document.getElementById('loginError');
+const showRatePayeer = document.getElementById('showRatePayeer');
+const showRateBinance = document.getElementById('showRateBinance');
+const rateUpdateTime = document.getElementById('rateUpdateTime');
 
 let currentEditingOrderId = null;
 
@@ -216,6 +237,7 @@ function showAdminPanel() {
   loginScreen.style.display = 'none';
   adminPanel.style.display = 'block';
   adminEmail.textContent = currentUser.email;
+  loadRates();
   loadAdmin();
 }
 
@@ -243,6 +265,38 @@ function updateStatus(){
 }
 setInterval(updateStatus,60000);
 updateStatus();
+
+// Load and display rates (read-only)
+function loadRates() {
+  // Set up listener for rates
+  if (ratesListener) ratesListener();
+  
+  ratesListener = db.collection('settings').doc('rates').onSnapshot((doc) => {
+    if (doc.exists) {
+      const data = doc.data();
+      showRatePayeer.innerText = data.payeer || '—';
+      showRateBinance.innerText = data.binance || '—';
+      
+      // Update last updated time if available
+      if (data.lastUpdated) {
+        const date = data.lastUpdated.toDate ? data.lastUpdated.toDate() : new Date(data.lastUpdated);
+        rateUpdateTime.innerText = date.toLocaleString();
+      } else {
+        rateUpdateTime.innerText = new Date().toLocaleString();
+      }
+    } else {
+      // Default rates if document doesn't exist
+      showRatePayeer.innerText = '—';
+      showRateBinance.innerText = '—';
+      rateUpdateTime.innerText = '—';
+    }
+  }, (error) => {
+    console.error("Error loading rates:", error);
+    showRatePayeer.innerText = 'Error';
+    showRateBinance.innerText = 'Error';
+    rateUpdateTime.innerText = '—';
+  });
+}
 
 // Orders: load / render
 function loadAdmin(){
