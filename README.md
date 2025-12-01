@@ -310,7 +310,7 @@ console.error("Error loading rates:", error);
 function saveRatesAdmin(){
 const r1 = ratePayeerAdmin.value.trim();
 const r2 = rateBinanceAdmin.value.trim();
-if(!r1 || isNaN(r1) || !r2 || isNaN(r2)){
+if(!r1 || is(r1) || !r2 || is(r2)){
 alert('সঠিক সংখ্যায় দুটি রেট দিন (Payeer ও Binance)');
 return;
 }
