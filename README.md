@@ -1,6 +1,6 @@
-এডমিন পেনেল
 
-<!doctype html>
+
+
 <html lang="bn">
 <head>
 <meta charset="utf-8" />
