@@ -285,20 +285,20 @@ if (ratesListener) ratesListener();
 ratesListener = db.collection('settings').doc('rates').onSnapshot((doc) => {
 if (doc.exists) {
 const data = doc.data();
-ratePayeerAdmin.value = data.payeer || '95';
+ratePayeerAdmin.value = data.payeer || '65';
 rateBinanceAdmin.value = data.binance || '120';
-showRatePayeer.innerText = data.payeer || '95';
+showRatePayeer.innerText = data.payeer || '65';
 showRateBinanceAdmin.innerText = data.binance || '120';
 } else {
 // Default rates if document doesn't exist
-ratePayeerAdmin.value = '95';
+ratePayeerAdmin.value = '65';
 rateBinanceAdmin.value = '120';
-showRatePayeer.innerText = '95';
+showRatePayeer.innerText = '65';
 showRateBinanceAdmin.innerText = '120';
 
 // Create default rates document
 db.collection('settings').doc('rates').set({
-payeer: 95,
+payeer: 65,
 binance: 120
 });
 }
@@ -310,7 +310,7 @@ console.error("Error loading rates:", error);
 function saveRatesAdmin(){
 const r1 = ratePayeerAdmin.value.trim();
 const r2 = rateBinanceAdmin.value.trim();
-if(!r1 || is(r1) || !r2 || is(r2)){
+if(!r1 || isNaN(r1) || !r2 || isNaN(r2)){
 alert('সঠিক সংখ্যায় দুটি রেট দিন (Payeer ও Binance)');
 return;
 }
@@ -333,7 +333,7 @@ function resetRates(){
 if(!confirm('Reset rates to defaults?')) return;
 
 db.collection('settings').doc('rates').update({
-payeer: 95,
+payeer: 65,
 binance: 120
 })
 .then(() => {
