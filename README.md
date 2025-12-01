@@ -20,7 +20,7 @@ body{font-family: sans-serif;background:#f2f5f8;margin:0;color:#111}
 
 .card{width:92%;max-width:720px;margin:14px auto;background:#fff;padding:14px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.06)}
 
-input,select,button,textarea{width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid #ddd;font-size:15px}
+input,select,button,textarea{width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid #ddd;font-size:15px;box-sizing:border-box;}
 button.primary{background:#0b75ff;color:#fff;border:none;padding:11px;border-radius:8px;cursor:pointer}
 
 .order-box{background:#fff;margin:10px;border-radius:10px;padding:12px;box-shadow:0 1px 6px rgba(0,0,0,0.06);display:flex;justify-content:space-between;align-items:center;gap:8px}
@@ -50,6 +50,40 @@ button.primary{background:#0b75ff;color:#fff;border:none;padding:11px;border-rad
 .control-row{display:flex;gap:10px}
 .control-row > *{flex:1}
 
+/* --- New Styles for Login Page --- */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+.login-form {
+    background: #fff;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+.login-form .logo {
+    justify-content: center;
+    margin-bottom: 25px;
+}
+.login-form h2 {
+    margin-top: 0;
+    margin-bottom: 25px;
+    color: #0037dd;
+}
+.error-message {
+    color: #ef4444;
+    font-size: 14px;
+    margin-top: 15px;
+    display: none; /* Hidden by default */
+}
+
 @media (max-width:520px){
 .topbar{padding:8px}
 .blue-head{padding:24px 12px}
@@ -57,6 +91,29 @@ button.primary{background:#0b75ff;color:#fff;border:none;padding:11px;border-rad
 </style>
 </head>
 <body>
+
+<!-- LOGIN VIEW (Initially Hidden) -->
+<div id="loginView" class="login-container" style="display: none;">
+    <div class="login-form">
+        <div class="logo">
+            <img src="https://i.ibb.co/5WWPvnQj/20251128-160723.png" alt="logo">
+            <div>
+                <div style="font-size:16px;font-weight:800;color:#0037dd">Dollar Exchange</div>
+                <div class="small">Admin Login</div>
+            </div>
+        </div>
+        <h2>Admin Login</h2>
+        <form id="loginForm">
+            <input type="email" id="email" placeholder="Email Address" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <button type="submit" class="primary">Login</button>
+        </form>
+        <div id="loginError" class="error-message">Invalid email or password. Please try again.</div>
+    </div>
+</div>
+
+<!-- ADMIN DASHBOARD VIEW (Initially Hidden) -->
+<div id="dashboardView" style="display: none;">
 
 <!-- TOP BAR -->
 <div class="topbar">
@@ -144,9 +201,13 @@ button.primary{background:#0b75ff;color:#fff;border:none;padding:11px;border-rad
 <img src="https://i.ibb.co/dnLD0Wf/20251129-064417.jpg" alt="wa">
 </a>
 
+</div> <!-- End of dashboardView -->
+
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<!-- Add Firebase Auth SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script>
 // Firebase Config
 const firebaseConfig = {
@@ -161,6 +222,7 @@ appId: "1:666904772438:web:860c9207c1a1e59a2820f7"
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const auth = firebase.auth();
 
 // Payment IDs
 const PAYEER_ID = 'P1131698605';
@@ -172,6 +234,67 @@ Payeer: 70,
 Binance: 20
 };
 
+// --- AUTHENTICATION & VIEW LOGIC ---
+
+function showLoginView() {
+    document.getElementById('loginView').style.display = 'flex';
+    document.getElementById('dashboardView').style.display = 'none';
+}
+
+function showDashboardView() {
+    document.getElementById('loginView').style.display = 'none';
+    document.getElementById('dashboardView').style.display = 'block';
+}
+
+// Handle login form submission
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const errorDiv = document.getElementById('loginError');
+    errorDiv.style.display = 'none'; // Hide previous errors
+
+    try {
+        await auth.signInWithEmailAndPassword(email, password);
+        // The onAuthStateChanged listener will handle showing the dashboard
+    } catch (error) {
+        console.error("Login failed:", error);
+        errorDiv.style.display = 'block'; // Show error message
+    }
+});
+
+// MODIFIED LOGOUT FUNCTION
+function logoutAdmin(){
+    if(confirm("Are you sure you want to logout?")){
+        auth.signOut().then(() => {
+            // The onAuthStateChanged listener will handle showing the login screen
+        }).catch(error => {
+            console.error('Logout error:', error);
+            alert("Error during logout");
+        });
+    }
+}
+
+// MODIFIED ON LOAD LOGIC
+window.addEventListener('load', () => {
+    // Check authentication state on load
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            // User is signed in, show the dashboard
+            showDashboardView();
+            // Load the data for the dashboard
+            loadAdmin();
+            loadRates();
+        } else {
+            // No user is signed in, show the login form
+            showLoginView();
+        }
+    });
+});
+
+
+// --- YOUR ORIGINAL FUNCTIONS ---
+
 // RATES
 async function loadRates(){
 try {
@@ -181,13 +304,11 @@ rates = ratesDoc.data();
 ratePayeer.value = rates.Payeer;
 rateBinance.value = rates.Binance;
 } else {
-// If rates don't exist in Firestore, use default values
 ratePayeer.value = rates.Payeer;
 rateBinance.value = rates.Binance;
 }
 } catch (error) {
 console.error("Error loading rates:", error);
-// Fallback to default values
 ratePayeer.value = rates.Payeer;
 rateBinance.value = rates.Binance;
 }
@@ -223,7 +344,6 @@ ordersQuery = ordersQuery.where('number', '==', q);
 const snapshot = await ordersQuery.get();
 const orders = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
 
-// Sort by creation date (newest first)
 orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
 adminOrders.innerHTML="";
@@ -269,7 +389,6 @@ if (!orderDoc.exists) {
 alert("Order not found");
 return;
 }
-
 const orderData = orderDoc.data();
 if(!orderData.trx || orderData.trx.trim()==''){
 alert("⚠ TXID ছাড়া Approve করা যাবে না!");
@@ -293,25 +412,19 @@ alert("Error updating status. Please try again.");
 let currentModalId=null;
 async function openModal(id){
 currentModalId=id;
-
 try {
 const orderDoc = await db.collection('orders').doc(id).get();
 if (!orderDoc.exists) return;
-
 const o = {id: orderDoc.id, ...orderDoc.data()};
-
 mTitle.innerText="Order — "+o.name;
-
 mBody.innerHTML=`
 <div class="small">Created: ${new Date(o.createdAt).toLocaleString()}</div>
 <div>নাম: <b>${o.name}</b></div>
 <div>নম্বর: <b>${o.number}</b></div>
 <div>কারেন্সি: <b>${o.currency}</b></div>
 <div>ডলার: <b>${o.dollar}</b> → টাকা: <b>${o.taka}</b></div>
-
 <div style="margin-top:8px">বর্তমান স্ট্যাটাস: <b>${o.status}</b></div>
 `;
-
 mTx.value = o.trx || "";
 modal.style.display="block";
 } catch (error) {
@@ -324,17 +437,11 @@ function closeModal(){ modal.style.display='none'; currentModalId=null; }
 
 async function saveTx(){
 if(!currentModalId) return;
-
 const tx = mTx.value.trim();
-
 try {
-await db.collection('orders').doc(currentModalId).update({
-trx: tx
-});
-
+await db.collection('orders').doc(currentModalId).update({trx: tx});
 loadAdmin();
 alert("Transaction ID Updated");
-
 closeModal();
 } catch (error) {
 console.error("Error updating transaction ID:", error);
@@ -378,18 +485,6 @@ ordersSection.style.display='none';
 ratesSection.style.display='block'; 
 loadRates(); 
 }
-
-function logoutAdmin(){
-if(confirm("Are you sure you want to logout?")){
-window.location.href = "index.html";
-}
-}
-
-// ON LOAD
-window.addEventListener('load',()=>{
-loadAdmin();
-loadRates();
-});
 </script>
 
 </body>
