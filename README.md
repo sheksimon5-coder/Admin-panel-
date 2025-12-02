@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="bn">
 <head>
 <meta charset="utf-8" />
@@ -186,7 +186,7 @@ let currencies = [
 
 // ADMIN CREDENTIALS
 const ADMIN_EMAIL = 'sheksimon5@gmail.com';
-const ADMIN_PASSWORD = 'saimon500';
+const ADMIN_PASSWORD = 'saimon1213';
 
 // ONLINE/OFFLINE
 function updateStatus(){
