@@ -168,6 +168,9 @@ button.primary{background:#0b75ff;color:#fff;border:none;padding:11px;border-rad
 <label>Binance Rate (1 USD = ? Tk)</label>
 <input id="rateBinance" type="number"/>
 
+<label>Advcash Rate (1 USD = ? Tk)</label>
+<input id="Advcash" type="number"/>
+
 <button class="primary" onclick="saveRates()">💾 Save Rates</button>
 </div>
 </div>
@@ -226,12 +229,15 @@ const auth = firebase.auth();
 
 // Payment IDs
 const PAYEER_ID = 'P1131698605';
-const BINANCE_ID = '1188473082';
+const BINANCE_ID = 'B1188473082';
+const Advcash_ID = 'U1048 5654 4714';
 
 // DEFAULT RATES
 let rates = {
 Payeer: 70,
-Binance: 20
+Binance: 20,
+Advcash: 105
+
 };
 
 // --- AUTHENTICATION & VIEW LOGIC ---
@@ -303,14 +309,17 @@ if (ratesDoc.exists) {
 rates = ratesDoc.data();
 ratePayeer.value = rates.Payeer;
 rateBinance.value = rates.Binance;
+rateBinance.value = rates.Advcash;
 } else {
 ratePayeer.value = rates.Payeer;
 rateBinance.value = rates.Binance;
+rateBinance.value = rates.Advcash;
 }
 } catch (error) {
 console.error("Error loading rates:", error);
 ratePayeer.value = rates.Payeer;
 rateBinance.value = rates.Binance;
+rateBinance.value = rates.Advcash;
 }
 }
 
@@ -319,11 +328,12 @@ try {
 await db.collection('settings').doc('rates').set({
 Payeer: Number(ratePayeer.value),
 Binance: Number(rateBinance.value)
+Advcash: Number(rateAdvcash.value)
 });
 
 rates.Payeer = Number(ratePayeer.value);
 rates.Binance = Number(rateBinance.value);
-
+rates.Advcash = Number(rateAdvcash.value);
 alert("✔ Dollar Rates Updated");
 } catch (error) {
 console.error("Error saving rates:", error);
