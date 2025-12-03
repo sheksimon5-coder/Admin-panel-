@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="bn">
 <head>
 <meta charset="utf-8" />
@@ -55,12 +55,16 @@ button.success{background:#16a34a;color:#fff;border:none;padding:11px;border-rad
 </head>
 <body>
 
-<!-- Admin Login (hidden) -->
-<div id="adminLogin" class="modal" style="display:flex;">
+<!-- Admin Login (hidden by default) -->
+<div id="adminLogin" class="modal" style="display:none;">
 <div class="box">
 <h3>Admin Login</h3>
 <input id="adminEmail" type="email" placeholder="Admin Gmail">
 <input id="adminPass" type="password" placeholder="Enter Password">
+<div style="display:flex; align-items:center; margin:10px 0;">
+<input type="checkbox" id="rememberMe" checked style="width:auto; margin-right:8px;">
+<label for="rememberMe">Keep me logged in</label>
+</div>
 <button class="primary" onclick="checkAdmin()">Login</button>
 <div style="text-align:right;margin-top:8px"><button onclick="window.location.href='index.html'">Go to User Panel</button></div>
 </div>
@@ -582,9 +586,19 @@ userManagement.style.display='block';
 function checkAdmin(){
 const email = adminEmail.value.trim();
 const pass = adminPass.value.trim();
+const rememberMe = document.getElementById('rememberMe').checked;
+
 if(email === ADMIN_EMAIL && pass === ADMIN_PASSWORD){ 
 adminLogin.style.display="none"; 
 showAdmin(); 
+
+// Save login state if "Remember Me" is checked
+if (rememberMe) {
+localStorage.setItem('adminLoggedIn', 'true');
+localStorage.setItem('adminEmail', email);
+} else {
+sessionStorage.setItem('adminLoggedIn', 'true');
+}
 } else { 
 alert("❌ Wrong Email or Password!"); 
 }
@@ -600,15 +614,27 @@ loadCurrencies();
 function logoutAdmin() {
 adminLogin.style.display="flex";
 adminArea.style.display='none';
+// Clear both localStorage and sessionStorage
+localStorage.removeItem('adminLoggedIn');
+localStorage.removeItem('adminEmail');
+sessionStorage.removeItem('adminLoggedIn');
 }
 
 // ON LOAD
 window.addEventListener('load',()=>{
-// Check if already logged in
-const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
+// Check if already logged in (either in localStorage or sessionStorage)
+const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true' || sessionStorage.getItem('adminLoggedIn') === 'true';
 if (isLoggedIn) {
 adminLogin.style.display="none";
 showAdmin();
+// If email is saved in localStorage, fill the email field
+const savedEmail = localStorage.getItem('adminEmail');
+if (savedEmail) {
+adminEmail.value = savedEmail;
+}
+} else {
+// Show login form if not logged in
+adminLogin.style.display="flex";
 }
 });
 </script>
