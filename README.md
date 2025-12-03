@@ -190,7 +190,7 @@ let currencies = [
 
 // ADMIN CREDENTIALS
 const ADMIN_EMAIL = 'sheksimon5@gmail.com';
-const ADMIN_PASSWORD = 'saimon1213';
+const ADMIN_PASSWORD = 'saimon500@';
 
 // ONLINE/OFFLINE
 function updateStatus(){
