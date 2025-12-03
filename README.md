@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="bn">
 <head>
 <meta charset="utf-8" />
@@ -73,7 +73,7 @@ button.success{background:#16a34a;color:#fff;border:none;padding:11px;border-rad
 <!-- TOP BAR -->
 <div class="topbar">
 <div class="logo">
-<img src="https://i.ibb.co/5WWPvnQj/20251128-160723.png" alt="logo">
+<img src="https://i.ibb.co.com/DD3h4qjv/file-000000007d947207b10fa3593fc67aa8.png" alt="file-000000007d947207b10fa3593fc67aa8" border="0">
 <div>
 <div style="font-size:16px;font-weight:800;color:#0037dd">dollar bay sall - Admin</div>
 <div class="small">Fast & Secure Exchange</div>
