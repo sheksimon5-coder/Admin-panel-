@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="bn">
 <head>
 <meta charset="utf-8" />
@@ -24,6 +24,7 @@ input,select,button,textarea{width:100%;padding:10px;margin:8px 0;border-radius:
 button.primary{background:#0b75ff;color:#fff;border:none;padding:11px;border-radius:8px;cursor:pointer}
 button.danger{background:#ef4444;color:#fff;border:none;padding:11px;border-radius:8px;cursor:pointer}
 button.success{background:#16a34a;color:#fff;border:none;padding:11px;border-radius:8px;cursor:pointer}
+button.warning{background:#f59e0b;color:#fff;border:none;padding:11px;border-radius:8px;cursor:pointer}
 
 .order-box{background:#fff;margin:10px;border-radius:10px;padding:12px;box-shadow:0 1px 6px rgba(0,0,0,0.06);display:flex;justify-content:space-between;align-items:center;gap:8px}
 .order-info{flex:1}
@@ -46,6 +47,15 @@ button.success{background:#16a34a;color:#fff;border:none;padding:11px;border-rad
 .currency-item{background:#f9fafb;padding:10px;border-radius:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
 .currency-info{flex:1}
 .currency-actions{display:flex;gap:5px}
+
+.tab-container{display:flex;overflow-x:auto;margin-bottom:10px}
+.tab-button{padding:10px 15px;background:#f3f4f6;border:none;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+.tab-button.active{border-bottom-color:#0b75ff;background:#e5f0ff}
+
+.form-section{display:none}
+.form-section.active{display:block}
+
+.color-preview{width:30px;height:30px;border-radius:4px;display:inline-block;margin-left:10px;border:1px solid #ddd}
 
 @media (max-width:520px){
 .topbar{padding:8px}
@@ -99,11 +109,13 @@ button.success{background:#16a34a;color:#fff;border:none;padding:11px;border-rad
 
 <!-- Admin Navigation -->
 <div class="card">
-<div style="display:flex;gap:10px;justify-content:center">
+<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
 <button class="primary" onclick="showAdminDashboard()">Dashboard</button>
 <button class="primary" onclick="showCurrencyManagement()">Currency Management</button>
 <button class="primary" onclick="showOrderManagement()">Order Management</button>
 <button class="primary" onclick="showUserManagement()">User Management</button>
+<button class="primary" onclick="showSiteSettings()">Site Settings</button>
+<button class="primary" onclick="showContentManagement()">Content Management</button>
 </div>
 </div>
 
@@ -124,9 +136,14 @@ button.success{background:#16a34a;color:#fff;border:none;padding:11px;border-rad
 
 <div style="margin-top:20px">
 <h4>Add New Currency</h4>
+<div class="control-row">
 <input id="newCurrencyName" placeholder="Currency Name" />
 <input id="newCurrencyRate" type="number" placeholder="Rate (1 USD = ? Tk)" />
+</div>
+<div class="control-row">
 <input id="newCurrencyId" placeholder="Payment ID" />
+<input id="newCurrencyImage" placeholder="Image URL" />
+</div>
 <button class="primary" onclick="addCurrency()">Add Currency</button>
 </div>
 </div>
@@ -150,14 +167,177 @@ button.success{background:#16a34a;color:#fff;border:none;padding:11px;border-rad
 </div>
 
 <!-- Site Settings -->
-<div class="card">
+<div id="siteSettings" class="card" style="display:none;">
 <h3>⚙️ Site Settings</h3>
+
+<div class="tab-container">
+<button class="tab-button active" onclick="showTab('general')">General</button>
+<button class="tab-button" onclick="showTab('operations')">Operations</button>
+<button class="tab-button" onclick="showTab('contact')">Contact</button>
+<button class="tab-button" onclick="showTab('fees')">Fees & Limits</button>
+</div>
+
+<!-- General Settings -->
+<div id="general" class="form-section active">
 <div>
 <label>Site Status Message</label>
 <input id="siteStatus" placeholder="Status message" />
+</div>
+<div>
+<label>Site Name</label>
+<input id="siteName" placeholder="Site Name" />
+</div>
+<div>
+<label>Tagline</label>
+<input id="siteTagline" placeholder="Tagline" />
+</div>
+<div>
+<label>Primary Color</label>
+<div style="display:flex;align-items:center">
+<input id="primaryColor" type="color" />
+<span id="primaryColorPreview" class="color-preview"></span>
+</div>
+</div>
+<div>
+<label>Secondary Color</label>
+<div style="display:flex;align-items:center">
+<input id="secondaryColor" type="color" />
+<span id="secondaryColorPreview" class="color-preview"></span>
+</div>
+</div>
+</div>
+
+<!-- Operations Settings -->
+<div id="operations" class="form-section">
+<div>
+<label>Working Hours</label>
+<div class="control-row">
+<input id="workStartHour" type="number" min="0" max="23" placeholder="Start Hour (0-23)" />
+<input id="workEndHour" type="number" min="0" max="23" placeholder="End Hour (0-23)" />
+</div>
+</div>
+<div>
+<label>Current Status Override</label>
+<select id="statusOverride">
+<option value="">Use Automatic</option>
+<option value="online">Force Online</option>
+<option value="offline">Force Offline</option>
+</select>
+</div>
+<div>
+<label>Order Instructions</label>
+<textarea id="orderInstructions" rows="3" placeholder="Instructions shown to users before placing an order"></textarea>
+</div>
+</div>
+
+<!-- Contact Settings -->
+<div id="contact" class="form-section">
+<div>
+<label>WhatsApp Link</label>
+<input id="whatsappLink" placeholder="WhatsApp Link" />
+</div>
+<div>
+<label>Contact Email</label>
+<input id="contactEmail" placeholder="Contact Email" />
+</div>
+<div>
+<label>Contact Phone</label>
+<input id="contactPhone" placeholder="Contact Phone" />
+</div>
+</div>
+
+<!-- Fees & Limits Settings -->
+<div id="fees" class="form-section">
+<div>
+<label>Minimum Dollar Amount</label>
+<input id="minDollarAmount" type="number" placeholder="Minimum Dollar Amount" />
+</div>
+<div>
+<label>Maximum Dollar Amount</label>
+<input id="maxDollarAmount" type="number" placeholder="Maximum Dollar Amount" />
+</div>
+<div>
+<label>Transaction Fee (Fixed)</label>
+<input id="transactionFee" type="number" placeholder="Transaction Fee" />
+</div>
+<div>
+<label>Transaction Fee (%)</label>
+<input id="transactionFeePercent" type="number" step="0.01" placeholder="Transaction Fee Percentage" />
+</div>
+</div>
+
 <button class="primary" onclick="saveSiteSettings()">Save Settings</button>
 </div>
+
+<!-- Content Management -->
+<div id="contentManagement" class="card" style="display:none;">
+<h3>📝 Content Management</h3>
+
+<div class="tab-container">
+<button class="tab-button active" onclick="showContentTab('home')">Home Page</button>
+<button class="tab-button" onclick="showContentTab('rules')">Rules & Instructions</button>
+<button class="tab-button" onclick="showContentTab('notifications')">Notifications</button>
 </div>
+
+<!-- Home Page Content -->
+<div id="home" class="form-section active">
+<div>
+<label>Welcome Title</label>
+<input id="welcomeTitle" placeholder="Welcome Title" />
+</div>
+<div>
+<label>Welcome Subtitle</label>
+<input id="welcomeSubtitle" placeholder="Welcome Subtitle" />
+</div>
+<div>
+<label>Navigation Button Text</label>
+<input id="navButtonText" placeholder="Navigation Button Text" />
+</div>
+<div>
+<label>Logo URL</label>
+<input id="logoUrl" placeholder="Logo URL" />
+</div>
+</div>
+
+<!-- Rules & Instructions Content -->
+<div id="rules" class="form-section">
+<div>
+<label>Rules Title</label>
+<input id="rulesTitle" placeholder="Rules Title" />
+</div>
+<div>
+<label>Rules Content</label>
+<textarea id="rulesContent" rows="6" placeholder="Rules & Instructions Content"></textarea>
+</div>
+</div>
+
+<!-- Notifications Management -->
+<div id="notifications" class="form-section">
+<div>
+<label>Global Notification</label>
+<input id="globalNotification" placeholder="Global Notification Message" />
+</div>
+<div>
+<label>Notification Type</label>
+<select id="notificationType">
+<option value="info">Information</option>
+<option value="warning">Warning</option>
+<option value="success">Success</option>
+<option value="error">Error</option>
+</select>
+</div>
+<div>
+<label>Active</label>
+<select id="notificationActive">
+<option value="true">Active</option>
+<option value="false">Inactive</option>
+</select>
+</div>
+</div>
+
+<button class="primary" onclick="saveContentSettings()">Save Content</button>
+</div>
+
 </div>
 
 <!-- Firebase SDK -->
@@ -183,9 +363,9 @@ const adminLogin = document.getElementById('adminLogin');
 
 // DEFAULT CURRENCIES
 let currencies = [
-{ id: 'Payeer', name: 'Payeer', rate: 70, paymentId: 'P1131698605' },
-{ id: 'Binance', name: 'Binance', rate: 20, paymentId: '1188473082' },
-{ id: 'Advcash', name: 'Advcash', rate: 60, paymentId: 'U 1048 5654 4714' }
+{ id: 'Payeer', name: 'Payeer', rate: 70, paymentId: 'P1131698605', image: 'https://i.ibb.co/6yJ1s7Q/payeer-logo.png' },
+{ id: 'Binance', name: 'Binance', rate: 20, paymentId: '1188473082', image: 'https://i.ibb.co/k3QJz5w/binance-logo.png' },
+{ id: 'Advcash', name: 'Advcash', rate: 60, paymentId: 'U 1048 5654 4714', image: 'https://i.ibb.co/1n1J7r6/advcash-logo.png' }
 ];
 
 // ADMIN CREDENTIALS
@@ -205,6 +385,35 @@ opStatus.className='status-badge online';
 }
 setInterval(updateStatus,60000);
 updateStatus();
+
+// TAB FUNCTIONS
+function showTab(tabName) {
+// Hide all tabs
+const tabs = document.querySelectorAll('.form-section');
+tabs.forEach(tab => tab.classList.remove('active'));
+  
+// Show selected tab
+document.getElementById(tabName).classList.add('active');
+  
+// Update tab buttons
+const buttons = document.querySelectorAll('.tab-button');
+buttons.forEach(button => button.classList.remove('active'));
+event.target.classList.add('active');
+}
+
+function showContentTab(tabName) {
+// Hide all tabs
+const tabs = document.querySelectorAll('.form-section');
+tabs.forEach(tab => tab.classList.remove('active'));
+  
+// Show selected tab
+document.getElementById(tabName).classList.add('active');
+  
+// Update tab buttons
+const buttons = document.querySelectorAll('.tab-button');
+buttons.forEach(button => button.classList.remove('active'));
+event.target.classList.add('active');
+}
 
 // CURRENCY MANAGEMENT
 async function loadCurrencies(){
@@ -244,6 +453,7 @@ item.innerHTML = `
 <div><b>${currency.name}</b></div>
 <div class="small">Rate: 1 USD = ${currency.rate} Tk</div>
 <div class="small">Payment ID: ${currency.paymentId}</div>
+ ${currency.image ? `<div class="small">Image: ${currency.image}</div>` : ''}
 </div>
 <div class="currency-actions">
 <button class="primary" onclick="editCurrency(${index})">Edit</button>
@@ -258,9 +468,10 @@ function addCurrency(){
 const name = document.getElementById('newCurrencyName').value.trim();
 const rate = parseFloat(document.getElementById('newCurrencyRate').value);
 const paymentId = document.getElementById('newCurrencyId').value.trim();
+const image = document.getElementById('newCurrencyImage').value.trim();
 
 if (!name || isNaN(rate) || !paymentId) {
-alert('Please fill all fields');
+alert('Please fill all required fields');
 return;
 }
 
@@ -273,7 +484,7 @@ alert('Currency with this name already exists');
 return;
 }
 
-currencies.push({ id, name, rate, paymentId });
+currencies.push({ id, name, rate, paymentId, image });
 saveCurrencies();
 loadCurrencies();
 
@@ -281,6 +492,7 @@ loadCurrencies();
 document.getElementById('newCurrencyName').value = '';
 document.getElementById('newCurrencyRate').value = '';
 document.getElementById('newCurrencyId').value = '';
+document.getElementById('newCurrencyImage').value = '';
 }
 
 function editCurrency(index){
@@ -294,11 +506,15 @@ if (newRate === null) return;
 const newPaymentId = prompt('Payment ID:', currency.paymentId);
 if (newPaymentId === null) return;
 
+const newImage = prompt('Image URL:', currency.image || '');
+if (newImage === null) return;
+
 currencies[index] = {
 ...currency,
 name: newName,
 rate: parseFloat(newRate),
-paymentId: newPaymentId
+paymentId: newPaymentId,
+image: newImage
 };
 
 saveCurrencies();
@@ -442,6 +658,8 @@ div.innerHTML = `
 </div>
 <div style="min-width:100px;text-align:right">
 <button onclick="viewUserOrders('${user.email}', '${user.number}')">View Orders</button>
+<button onclick="editUser('${user.id}')">Edit</button>
+<button onclick="deleteUser('${user.id}')" class="danger">Delete</button>
 </div>
 `;
 userList.appendChild(div);
@@ -457,6 +675,53 @@ async function viewUserOrders(email, number) {
 showOrderManagement();
 adminSearch.value = number;
 loadAdminOrders();
+}
+
+async function editUser(userId) {
+try {
+const userDoc = await db.collection('users').doc(userId).get();
+if (!userDoc.exists) {
+alert("User not found");
+return;
+}
+
+const user = userDoc.data();
+const newName = prompt('User name:', user.name);
+if (newName === null) return;
+
+const newNumber = prompt('Phone number:', user.number);
+if (newNumber === null) return;
+
+const newUserType = prompt('User type (regular/fisher):', user.userType || 'regular');
+if (newUserType === null) return;
+
+await db.collection('users').doc(userId).update({
+name: newName,
+number: newNumber,
+userType: newUserType
+});
+
+alert("User updated successfully");
+searchUsers();
+} catch (error) {
+console.error("Error updating user:", error);
+alert("Error updating user. Please try again.");
+}
+}
+
+async function deleteUser(userId) {
+if (!confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
+return;
+}
+
+try {
+await db.collection('users').doc(userId).delete();
+alert("User deleted successfully");
+searchUsers();
+} catch (error) {
+console.error("Error deleting user:", error);
+alert("Error deleting user. Please try again.");
+}
 }
 
 // ADMIN: Dashboard
@@ -532,6 +797,21 @@ const settingsDoc = await db.collection('settings').doc('site').get();
 if (settingsDoc.exists) {
 const settings = settingsDoc.data();
 siteStatus.value = settings.status || '';
+siteName.value = settings.name || '';
+siteTagline.value = settings.tagline || '';
+primaryColor.value = settings.primaryColor || '#0b75ff';
+secondaryColor.value = settings.secondaryColor || '#0037dd';
+workStartHour.value = settings.workStartHour || 9;
+workEndHour.value = settings.workEndHour || 22;
+statusOverride.value = settings.statusOverride || '';
+orderInstructions.value = settings.orderInstructions || '';
+whatsappLink.value = settings.whatsappLink || 'https://wa.me/qr/DTBEJ472LPKOA1';
+contactEmail.value = settings.contactEmail || '';
+contactPhone.value = settings.contactPhone || '';
+minDollarAmount.value = settings.minDollarAmount || 1;
+maxDollarAmount.value = settings.maxDollarAmount || 1000;
+transactionFee.value = settings.transactionFee || 0;
+transactionFeePercent.value = settings.transactionFeePercent || 0;
 }
 } catch (error) {
 console.error("Error loading site settings:", error);
@@ -541,12 +821,68 @@ console.error("Error loading site settings:", error);
 async function saveSiteSettings() {
 try {
 await db.collection('settings').doc('site').set({
-status: siteStatus.value
+status: siteStatus.value,
+name: siteName.value,
+tagline: siteTagline.value,
+primaryColor: primaryColor.value,
+secondaryColor: secondaryColor.value,
+workStartHour: parseInt(workStartHour.value) || 9,
+workEndHour: parseInt(workEndHour.value) || 22,
+statusOverride: statusOverride.value,
+orderInstructions: orderInstructions.value,
+whatsappLink: whatsappLink.value,
+contactEmail: contactEmail.value,
+contactPhone: contactPhone.value,
+minDollarAmount: parseFloat(minDollarAmount.value) || 1,
+maxDollarAmount: parseFloat(maxDollarAmount.value) || 1000,
+transactionFee: parseFloat(transactionFee.value) || 0,
+transactionFeePercent: parseFloat(transactionFeePercent.value) || 0
 });
 alert("Site settings updated successfully");
 } catch (error) {
 console.error("Error saving site settings:", error);
 alert("Error updating site settings. Please try again.");
+}
+}
+
+// ADMIN: Content Management
+async function loadContentSettings() {
+try {
+const contentDoc = await db.collection('settings').doc('content').get();
+if (contentDoc.exists) {
+const content = contentDoc.data();
+welcomeTitle.value = content.welcomeTitle || 'Welcome to Dollar Exchange';
+welcomeSubtitle.value = content.welcomeSubtitle || 'দয়া করে ট্রানজেকশন শুরু করার আগে নিয়মগুলো পড়ে নিন';
+navButtonText.value = content.navButtonText || 'নগদ বিকাশ 5 টাকা সেন্ড মানি ফি কেটে নেওয়া হয়';
+logoUrl.value = content.logoUrl || 'https://i.ibb.co.com/DD3h4qjv/file-000000007d947207b10fa3593fc67aa8.png';
+rulesTitle.value = content.rulesTitle || 'Exchange Rules';
+rulesContent.value = content.rulesContent || 'Please read all rules before making a transaction.';
+globalNotification.value = content.globalNotification || '';
+notificationType.value = content.notificationType || 'info';
+notificationActive.value = content.notificationActive !== undefined ? content.notificationActive.toString() : 'false';
+}
+} catch (error) {
+console.error("Error loading content settings:", error);
+}
+}
+
+async function saveContentSettings() {
+try {
+await db.collection('settings').doc('content').set({
+welcomeTitle: welcomeTitle.value,
+welcomeSubtitle: welcomeSubtitle.value,
+navButtonText: navButtonText.value,
+logoUrl: logoUrl.value,
+rulesTitle: rulesTitle.value,
+rulesContent: rulesContent.value,
+globalNotification: globalNotification.value,
+notificationType: notificationType.value,
+notificationActive: notificationActive.value === 'true'
+});
+alert("Content settings updated successfully");
+} catch (error) {
+console.error("Error saving content settings:", error);
+alert("Error updating content settings. Please try again.");
 }
 }
 
@@ -556,6 +892,8 @@ adminDashboard.style.display='block';
 currencyManagement.style.display='none';
 orderManagement.style.display='none';
 userManagement.style.display='none';
+siteSettings.style.display='none';
+contentManagement.style.display='none';
 loadDashboard();
 }
 
@@ -564,6 +902,8 @@ adminDashboard.style.display='none';
 currencyManagement.style.display='block';
 orderManagement.style.display='none';
 userManagement.style.display='none';
+siteSettings.style.display='none';
+contentManagement.style.display='none';
 updateCurrencyList();
 }
 
@@ -572,6 +912,8 @@ adminDashboard.style.display='none';
 currencyManagement.style.display='none';
 orderManagement.style.display='block';
 userManagement.style.display='none';
+siteSettings.style.display='none';
+contentManagement.style.display='none';
 loadAdminOrders();
 }
 
@@ -580,6 +922,28 @@ adminDashboard.style.display='none';
 currencyManagement.style.display='none';
 orderManagement.style.display='none';
 userManagement.style.display='block';
+siteSettings.style.display='none';
+contentManagement.style.display='none';
+}
+
+function showSiteSettings(){
+adminDashboard.style.display='none';
+currencyManagement.style.display='none';
+orderManagement.style.display='none';
+userManagement.style.display='none';
+siteSettings.style.display='block';
+contentManagement.style.display='none';
+loadSiteSettings();
+}
+
+function showContentManagement(){
+adminDashboard.style.display='none';
+currencyManagement.style.display='none';
+orderManagement.style.display='none';
+userManagement.style.display='none';
+siteSettings.style.display='none';
+contentManagement.style.display='block';
+loadContentSettings();
 }
 
 // ADMIN LOGIN CHECK
