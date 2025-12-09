@@ -48,6 +48,11 @@ button.warning{background:#f59e0b;color:#fff;border:none;padding:11px;border-rad
 .currency-info{flex:1}
 .currency-actions{display:flex;gap:5px}
 
+.quote-item{background:#f9fafb;padding:15px;border-radius:8px;margin-bottom:15px;position:relative}
+.quote-text{font-style:italic;margin-bottom:10px;color:#333}
+.quote-author{font-weight:bold;text-align:right;color:#666}
+.quote-actions{position:absolute;top:10px;right:10px;display:flex;gap:5px}
+
 .tab-container{display:flex;overflow-x:auto;margin-bottom:10px}
 .tab-button{padding:10px 15px;background:#f3f4f6;border:none;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
 .tab-button.active{border-bottom-color:#0b75ff;background:#e5f0ff}
@@ -56,6 +61,46 @@ button.warning{background:#f59e0b;color:#fff;border:none;padding:11px;border-rad
 .form-section.active{display:block}
 
 .color-preview{width:30px;height:30px;border-radius:4px;display:inline-block;margin-left:10px;border:1px solid #ddd}
+
+.toggle-switch{position:relative;display:inline-block;width:60px;height:34px}
+.toggle-switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#ccc;transition:.4s;border-radius:34px}
+.slider:before{position:absolute;content:"";height:26px;width:26px;left:4px;bottom:4px;background-color:white;transition:.4s;border-radius:50%}
+input:checked + .slider{background-color:#0b75ff}
+input:checked + .slider:before{transform:translateX(26px)}
+
+.trade-type-toggle {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 15px 0;
+}
+
+.trade-type-toggle button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.trade-type-toggle button.active {
+  background: #0b75ff;
+  color: white;
+}
+
+.trade-type-toggle button:first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.trade-type-toggle button:last-child {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
 
 @media (max-width:520px){
 .topbar{padding:8px}
@@ -116,6 +161,7 @@ button.warning{background:#f59e0b;color:#fff;border:none;padding:11px;border-rad
 <button class="primary" onclick="showUserManagement()">User Management</button>
 <button class="primary" onclick="showSiteSettings()">Site Settings</button>
 <button class="primary" onclick="showContentManagement()">Content Management</button>
+<button class="primary" onclick="showQuoteManagement()">Quote Management</button>
 </div>
 </div>
 
@@ -138,7 +184,10 @@ button.warning{background:#f59e0b;color:#fff;border:none;padding:11px;border-rad
 <h4>Add New Currency</h4>
 <div class="control-row">
 <input id="newCurrencyName" placeholder="Currency Name" />
-<input id="newCurrencyRate" type="number" placeholder="Rate (1 USD = ? Tk)" />
+</div>
+<div class="control-row">
+<input id="newCurrencyBuyRate" type="number" placeholder="Buy Rate (1 USD = ? Tk)" />
+<input id="newCurrencySellRate" type="number" placeholder="Sell Rate (1 USD = ? Tk)" />
 </div>
 <div class="control-row">
 <input id="newCurrencyId" placeholder="Payment ID" />
@@ -175,6 +224,7 @@ button.warning{background:#f59e0b;color:#fff;border:none;padding:11px;border-rad
 <button class="tab-button" onclick="showTab('operations')">Operations</button>
 <button class="tab-button" onclick="showTab('contact')">Contact</button>
 <button class="tab-button" onclick="showTab('fees')">Fees & Limits</button>
+<button class="tab-button" onclick="showTab('ui')">UI Customization</button>
 </div>
 
 <!-- General Settings -->
@@ -192,18 +242,15 @@ button.warning{background:#f59e0b;color:#fff;border:none;padding:11px;border-rad
 <input id="siteTagline" placeholder="Tagline" />
 </div>
 <div>
-<label>Primary Color</label>
-<div style="display:flex;align-items:center">
-<input id="primaryColor" type="color" />
-<span id="primaryColorPreview" class="color-preview"></span>
-</div>
+<label>Maintenance Mode</label>
+<label class="toggle-switch">
+<input type="checkbox" id="maintenanceMode">
+<span class="slider"></span>
+</label>
 </div>
 <div>
-<label>Secondary Color</label>
-<div style="display:flex;align-items:center">
-<input id="secondaryColor" type="color" />
-<span id="secondaryColorPreview" class="color-preview"></span>
-</div>
+<label>Maintenance Message</label>
+<textarea id="maintenanceMessage" rows="3" placeholder="Message to show during maintenance"></textarea>
 </div>
 </div>
 
@@ -227,6 +274,13 @@ button.warning{background:#f59e0b;color:#fff;border:none;padding:11px;border-rad
 <div>
 <label>Order Instructions</label>
 <textarea id="orderInstructions" rows="3" placeholder="Instructions shown to users before placing an order"></textarea>
+</div>
+<div>
+<label>Require Login for Orders</label>
+<label class="toggle-switch">
+<input type="checkbox" id="requireLogin">
+<span class="slider"></span>
+</label>
 </div>
 </div>
 
@@ -266,6 +320,39 @@ button.warning{background:#f59e0b;color:#fff;border:none;padding:11px;border-rad
 </div>
 </div>
 
+<!-- UI Customization Settings -->
+<div id="ui" class="form-section">
+<div>
+<label>Primary Color</label>
+<div style="display:flex;align-items:center">
+<input id="primaryColor" type="color" />
+<span id="primaryColorPreview" class="color-preview"></span>
+</div>
+</div>
+<div>
+<label>Secondary Color</label>
+<div style="display:flex;align-items:center">
+<input id="secondaryColor" type="color" />
+<span id="secondaryColorPreview" class="color-preview"></span>
+</div>
+</div>
+<div>
+<label>Logo URL</label>
+<input id="logoUrl" placeholder="Logo URL" />
+</div>
+<div>
+<label>Favicon URL</label>
+<input id="faviconUrl" placeholder="Favicon URL" />
+</div>
+<div>
+<label>Background Color</label>
+<div style="display:flex;align-items:center">
+<input id="backgroundColor" type="color" />
+<span id="backgroundColorPreview" class="color-preview"></span>
+</div>
+</div>
+</div>
+
 <button class="primary" onclick="saveSiteSettings()">Save Settings</button>
 </div>
 
@@ -277,6 +364,7 @@ button.warning{background:#f59e0b;color:#fff;border:none;padding:11px;border-rad
 <button class="tab-button active" onclick="showContentTab('home')">Home Page</button>
 <button class="tab-button" onclick="showContentTab('rules')">Rules & Instructions</button>
 <button class="tab-button" onclick="showContentTab('notifications')">Notifications</button>
+<button class="tab-button" onclick="showContentTab('payments')">Payment Methods</button>
 </div>
 
 <!-- Home Page Content -->
@@ -294,8 +382,8 @@ button.warning{background:#f59e0b;color:#fff;border:none;padding:11px;border-rad
 <input id="navButtonText" placeholder="Navigation Button Text" />
 </div>
 <div>
-<label>Logo URL</label>
-<input id="logoUrl" placeholder="Logo URL" />
+<label>Home Page Content</label>
+<textarea id="homeContent" rows="6" placeholder="Home Page Content"></textarea>
 </div>
 </div>
 
@@ -328,14 +416,51 @@ button.warning{background:#f59e0b;color:#fff;border:none;padding:11px;border-rad
 </div>
 <div>
 <label>Active</label>
-<select id="notificationActive">
-<option value="true">Active</option>
-<option value="false">Inactive</option>
-</select>
+<label class="toggle-switch">
+<input type="checkbox" id="notificationActive">
+<span class="slider"></span>
+</label>
+</div>
+</div>
+
+<!-- Payment Methods Management -->
+<div id="payments" class="form-section">
+<div id="paymentMethodsList">
+<!-- Payment methods will be loaded here -->
+</div>
+
+<div style="margin-top:20px">
+<h4>Add New Payment Method</h4>
+<div class="control-row">
+<input id="newPaymentName" placeholder="Payment Method Name" />
+<input id="newPaymentFee" type="number" step="0.01" placeholder="Fee (%)" />
+</div>
+<button class="primary" onclick="addPaymentMethod()">Add Payment Method</button>
 </div>
 </div>
 
 <button class="primary" onclick="saveContentSettings()">Save Content</button>
+</div>
+
+<!-- Quote Management -->
+<div id="quoteManagement" class="card" style="display:none;">
+<h3>💬 Quote Management</h3>
+<div id="quotesList">
+<!-- Quotes will be loaded here -->
+</div>
+
+<div style="margin-top:20px">
+<h4>Add New Quote</h4>
+<textarea id="newQuoteText" rows="3" placeholder="Enter quote text"></textarea>
+<input id="newQuoteAuthor" placeholder="Author name (optional)" />
+<div class="control-row">
+<label style="margin-top:10px">
+<input type="checkbox" id="newQuoteFeatured" style="width:auto; margin-right:8px;">
+Mark as Featured
+</label>
+</div>
+<button class="primary" onclick="addQuote()">Add Quote</button>
+</div>
 </div>
 
 </div>
@@ -361,11 +486,24 @@ const db = firebase.firestore();
 // Get DOM elements
 const adminLogin = document.getElementById('adminLogin');
 
-// DEFAULT CURRENCIES
+// DEFAULT CURRENCIES - Updated with separate buy and sell rates
 let currencies = [
-{ id: 'Payeer', name: 'Payeer', rate: 70, paymentId: 'P1131698605', image: 'https://i.ibb.co/6yJ1s7Q/payeer-logo.png' },
-{ id: 'Binance', name: 'Binance', rate: 20, paymentId: '1188473082', image: 'https://i.ibb.co/k3QJz5w/binance-logo.png' },
-{ id: 'Advcash', name: 'Advcash', rate: 60, paymentId: 'U 1048 5654 4714', image: 'https://i.ibb.co/1n1J7r6/advcash-logo.png' }
+{ id: 'Payeer', name: 'Payeer', buyRate: 68, sellRate: 70, paymentId: 'P1131698605', image: 'https://i.ibb.co/6yJ1s7Q/payeer-logo.png' },
+{ id: 'Binance', name: 'Binance', buyRate: 19, sellRate: 20, paymentId: '1188473082', image: 'https://i.ibb.co/k3QJz5w/binance-logo.png' },
+{ id: 'Advcash', name: 'Advcash', buyRate: 58, sellRate: 60, paymentId: 'U 1048 5654 4714', image: 'https://i.ibb.co/1n1J7r6/advcash-logo.png' }
+];
+
+// DEFAULT PAYMENT METHODS
+let paymentMethods = [
+{ id: 'bKash', name: 'bKash', fee: 1.5 },
+{ id: 'Nagad', name: 'Nagad', fee: 1.5 },
+{ id: 'Rocket', name: 'Rocket', fee: 1.5 }
+];
+
+// DEFAULT QUOTES
+let quotes = [
+{ text: "The best time to plant a tree was 20 years ago. The second best time is now.", author: "Chinese Proverb", featured: true },
+{ text: "Money is a terrible master but an excellent servant.", author: "P.T. Barnum", featured: false }
 ];
 
 // ADMIN CREDENTIALS
@@ -451,7 +589,8 @@ item.className = 'currency-item';
 item.innerHTML = `
 <div class="currency-info">
 <div><b>${currency.name}</b></div>
-<div class="small">Rate: 1 USD = ${currency.rate} Tk</div>
+<div class="small">Buy Rate: 1 USD = ${currency.buyRate || currency.rate} Tk</div>
+<div class="small">Sell Rate: 1 USD = ${currency.sellRate || currency.rate} Tk</div>
 <div class="small">Payment ID: ${currency.paymentId}</div>
  ${currency.image ? `<div class="small">Image: ${currency.image}</div>` : ''}
 </div>
@@ -466,11 +605,12 @@ currencyList.appendChild(item);
 
 function addCurrency(){
 const name = document.getElementById('newCurrencyName').value.trim();
-const rate = parseFloat(document.getElementById('newCurrencyRate').value);
+const buyRate = parseFloat(document.getElementById('newCurrencyBuyRate').value);
+const sellRate = parseFloat(document.getElementById('newCurrencySellRate').value);
 const paymentId = document.getElementById('newCurrencyId').value.trim();
 const image = document.getElementById('newCurrencyImage').value.trim();
 
-if (!name || isNaN(rate) || !paymentId) {
+if (!name || isNaN(buyRate) || isNaN(sellRate) || !paymentId) {
 alert('Please fill all required fields');
 return;
 }
@@ -484,13 +624,14 @@ alert('Currency with this name already exists');
 return;
 }
 
-currencies.push({ id, name, rate, paymentId, image });
+currencies.push({ id, name, buyRate, sellRate, paymentId, image });
 saveCurrencies();
 loadCurrencies();
 
 // Clear form
 document.getElementById('newCurrencyName').value = '';
-document.getElementById('newCurrencyRate').value = '';
+document.getElementById('newCurrencyBuyRate').value = '';
+document.getElementById('newCurrencySellRate').value = '';
 document.getElementById('newCurrencyId').value = '';
 document.getElementById('newCurrencyImage').value = '';
 }
@@ -500,8 +641,11 @@ const currency = currencies[index];
 const newName = prompt('Currency name:', currency.name);
 if (newName === null) return;
 
-const newRate = prompt('Rate (1 USD = ? Tk):', currency.rate);
-if (newRate === null) return;
+const newBuyRate = prompt('Buy Rate (1 USD = ? Tk):', currency.buyRate || currency.rate);
+if (newBuyRate === null) return;
+
+const newSellRate = prompt('Sell Rate (1 USD = ? Tk):', currency.sellRate || currency.rate);
+if (newSellRate === null) return;
 
 const newPaymentId = prompt('Payment ID:', currency.paymentId);
 if (newPaymentId === null) return;
@@ -512,7 +656,8 @@ if (newImage === null) return;
 currencies[index] = {
 ...currency,
 name: newName,
-rate: parseFloat(newRate),
+buyRate: parseFloat(newBuyRate),
+sellRate: parseFloat(newSellRate),
 paymentId: newPaymentId,
 image: newImage
 };
@@ -526,6 +671,201 @@ if (confirm('Are you sure you want to delete this currency?')) {
 currencies.splice(index, 1);
 saveCurrencies();
 loadCurrencies();
+}
+}
+
+// PAYMENT METHODS MANAGEMENT
+async function loadPaymentMethods(){
+try {
+const paymentMethodsDoc = await db.collection('settings').doc('paymentMethods').get();
+if (paymentMethodsDoc.exists) {
+paymentMethods = paymentMethodsDoc.data().list || paymentMethods;
+}
+} catch (error) {
+console.error("Error loading payment methods:", error);
+}
+
+updatePaymentMethodsList();
+}
+
+async function savePaymentMethods(){
+try {
+await db.collection('settings').doc('paymentMethods').set({
+list: paymentMethods
+});
+alert("Payment methods updated successfully");
+} catch (error) {
+console.error("Error saving payment methods:", error);
+alert("Error updating payment methods. Please try again.");
+}
+}
+
+function updatePaymentMethodsList(){
+const paymentMethodsList = document.getElementById('paymentMethodsList');
+paymentMethodsList.innerHTML = '';
+
+paymentMethods.forEach((method, index) => {
+const item = document.createElement('div');
+item.className = 'currency-item';
+item.innerHTML = `
+<div class="currency-info">
+<div><b>${method.name}</b></div>
+<div class="small">Fee: ${method.fee}%</div>
+</div>
+<div class="currency-actions">
+<button class="primary" onclick="editPaymentMethod(${index})">Edit</button>
+<button class="danger" onclick="deletePaymentMethod(${index})">Delete</button>
+</div>
+`;
+paymentMethodsList.appendChild(item);
+});
+}
+
+function addPaymentMethod(){
+const name = document.getElementById('newPaymentName').value.trim();
+const fee = parseFloat(document.getElementById('newPaymentFee').value);
+
+if (!name || isNaN(fee)) {
+alert('Please fill all fields');
+return;
+}
+
+// Generate a unique ID for the payment method
+const id = name.toLowerCase().replace(/\s+/g, '_');
+
+// Check if payment method already exists
+if (paymentMethods.find(m => m.id === id)) {
+alert('Payment method with this name already exists');
+return;
+}
+
+paymentMethods.push({ id, name, fee });
+savePaymentMethods();
+loadPaymentMethods();
+
+// Clear form
+document.getElementById('newPaymentName').value = '';
+document.getElementById('newPaymentFee').value = '';
+}
+
+function editPaymentMethod(index){
+const method = paymentMethods[index];
+const newName = prompt('Payment method name:', method.name);
+if (newName === null) return;
+
+const newFee = prompt('Fee (%):', method.fee);
+if (newFee === null) return;
+
+paymentMethods[index] = {
+...method,
+name: newName,
+fee: parseFloat(newFee)
+};
+
+savePaymentMethods();
+loadPaymentMethods();
+}
+
+function deletePaymentMethod(index){
+if (confirm('Are you sure you want to delete this payment method?')) {
+paymentMethods.splice(index, 1);
+savePaymentMethods();
+loadPaymentMethods();
+}
+}
+
+// QUOTE MANAGEMENT
+async function loadQuotes(){
+try {
+const quotesDoc = await db.collection('settings').doc('quotes').get();
+if (quotesDoc.exists) {
+quotes = quotesDoc.data().list || quotes;
+}
+} catch (error) {
+console.error("Error loading quotes:", error);
+}
+
+updateQuotesList();
+}
+
+async function saveQuotes(){
+try {
+await db.collection('settings').doc('quotes').set({
+list: quotes
+});
+alert("Quotes updated successfully");
+} catch (error) {
+console.error("Error saving quotes:", error);
+alert("Error updating quotes. Please try again.");
+}
+}
+
+function updateQuotesList(){
+const quotesList = document.getElementById('quotesList');
+quotesList.innerHTML = '';
+
+quotes.forEach((quote, index) => {
+const item = document.createElement('div');
+item.className = 'quote-item';
+item.innerHTML = `
+<div class="quote-text">"${quote.text}"</div>
+<div class="quote-author">- ${quote.author || 'Anonymous'}</div>
+<div class="quote-actions">
+ ${quote.featured ? '<span style="background:#f59e0b;color:white;padding:2px 6px;border-radius:4px;font-size:12px;">Featured</span>' : ''}
+<button class="primary" onclick="editQuote(${index})">Edit</button>
+<button class="danger" onclick="deleteQuote(${index})">Delete</button>
+</div>
+`;
+quotesList.appendChild(item);
+});
+}
+
+function addQuote(){
+const text = document.getElementById('newQuoteText').value.trim();
+const author = document.getElementById('newQuoteAuthor').value.trim();
+const featured = document.getElementById('newQuoteFeatured').checked;
+
+if (!text) {
+alert('Please enter quote text');
+return;
+}
+
+quotes.push({ text, author, featured, createdAt: new Date().toISOString() });
+saveQuotes();
+loadQuotes();
+
+// Clear form
+document.getElementById('newQuoteText').value = '';
+document.getElementById('newQuoteAuthor').value = '';
+document.getElementById('newQuoteFeatured').checked = false;
+}
+
+function editQuote(index){
+const quote = quotes[index];
+const newText = prompt('Quote text:', quote.text);
+if (newText === null) return;
+
+const newAuthor = prompt('Author:', quote.author || '');
+if (newAuthor === null) return;
+
+const newFeatured = confirm('Mark as featured?', quote.featured);
+
+quotes[index] = {
+...quote,
+text: newText,
+author: newAuthor,
+featured: newFeatured
+};
+
+saveQuotes();
+loadQuotes();
+}
+
+function deleteQuote(index){
+if (confirm('Are you sure you want to delete this quote?')) {
+quotes.splice(index, 1);
+saveQuotes();
+loadQuotes();
 }
 }
 
@@ -559,9 +899,10 @@ div.className='order-box';
 div.innerHTML=`
 <div style="flex:1">
 <b>${o.name}</b> <span class="small">• ${new Date(o.createdAt).toLocaleString()}</span>
-<div class="small">নম্বর: ${o.number} • ${o.currency} • ${o.dollar} USD → ${o.taka} TK</div>
+<div class="small">নম্বার: ${o.number} • ${o.currency} • ${o.dollar} USD → ${o.taka} TK</div>
 <div class="small">মাধ্যম: ${o.via || 'Not given'}</div>
 <div>TXID: <span class="small">${o.trx||'—'}</span></div>
+<div class="small">Trade Type: ${o.tradeType || 'sell'}</div>
 </div>
 
 <div style="min-width:150px;text-align:right">
@@ -812,6 +1153,12 @@ minDollarAmount.value = settings.minDollarAmount || 1;
 maxDollarAmount.value = settings.maxDollarAmount || 1000;
 transactionFee.value = settings.transactionFee || 0;
 transactionFeePercent.value = settings.transactionFeePercent || 0;
+logoUrl.value = settings.logoUrl || '';
+faviconUrl.value = settings.faviconUrl || '';
+backgroundColor.value = settings.backgroundColor || '#f2f5f8';
+maintenanceMode.checked = settings.maintenanceMode || false;
+maintenanceMessage.value = settings.maintenanceMessage || '';
+requireLogin.checked = settings.requireLogin || false;
 }
 } catch (error) {
 console.error("Error loading site settings:", error);
@@ -836,7 +1183,13 @@ contactPhone: contactPhone.value,
 minDollarAmount: parseFloat(minDollarAmount.value) || 1,
 maxDollarAmount: parseFloat(maxDollarAmount.value) || 1000,
 transactionFee: parseFloat(transactionFee.value) || 0,
-transactionFeePercent: parseFloat(transactionFeePercent.value) || 0
+transactionFeePercent: parseFloat(transactionFeePercent.value) || 0,
+logoUrl: logoUrl.value,
+faviconUrl: faviconUrl.value,
+backgroundColor: backgroundColor.value,
+maintenanceMode: maintenanceMode.checked,
+maintenanceMessage: maintenanceMessage.value,
+requireLogin: requireLogin.checked
 });
 alert("Site settings updated successfully");
 } catch (error) {
@@ -854,12 +1207,12 @@ const content = contentDoc.data();
 welcomeTitle.value = content.welcomeTitle || 'Welcome to Dollar Exchange';
 welcomeSubtitle.value = content.welcomeSubtitle || 'দয়া করে ট্রানজেকশন শুরু করার আগে নিয়মগুলো পড়ে নিন';
 navButtonText.value = content.navButtonText || 'নগদ বিকাশ 5 টাকা সেন্ড মানি ফি কেটে নেওয়া হয়';
-logoUrl.value = content.logoUrl || 'https://i.ibb.co.com/DD3h4qjv/file-000000007d947207b10fa3593fc67aa8.png';
+homeContent.value = content.homeContent || '';
 rulesTitle.value = content.rulesTitle || 'Exchange Rules';
 rulesContent.value = content.rulesContent || 'Please read all rules before making a transaction.';
 globalNotification.value = content.globalNotification || '';
 notificationType.value = content.notificationType || 'info';
-notificationActive.value = content.notificationActive !== undefined ? content.notificationActive.toString() : 'false';
+notificationActive.checked = content.notificationActive || false;
 }
 } catch (error) {
 console.error("Error loading content settings:", error);
@@ -872,12 +1225,12 @@ await db.collection('settings').doc('content').set({
 welcomeTitle: welcomeTitle.value,
 welcomeSubtitle: welcomeSubtitle.value,
 navButtonText: navButtonText.value,
-logoUrl: logoUrl.value,
+homeContent: homeContent.value,
 rulesTitle: rulesTitle.value,
 rulesContent: rulesContent.value,
 globalNotification: globalNotification.value,
 notificationType: notificationType.value,
-notificationActive: notificationActive.value === 'true'
+notificationActive: notificationActive.checked
 });
 alert("Content settings updated successfully");
 } catch (error) {
@@ -894,6 +1247,7 @@ orderManagement.style.display='none';
 userManagement.style.display='none';
 siteSettings.style.display='none';
 contentManagement.style.display='none';
+quoteManagement.style.display='none';
 loadDashboard();
 }
 
@@ -904,6 +1258,7 @@ orderManagement.style.display='none';
 userManagement.style.display='none';
 siteSettings.style.display='none';
 contentManagement.style.display='none';
+quoteManagement.style.display='none';
 updateCurrencyList();
 }
 
@@ -914,6 +1269,7 @@ orderManagement.style.display='block';
 userManagement.style.display='none';
 siteSettings.style.display='none';
 contentManagement.style.display='none';
+quoteManagement.style.display='none';
 loadAdminOrders();
 }
 
@@ -924,6 +1280,7 @@ orderManagement.style.display='none';
 userManagement.style.display='block';
 siteSettings.style.display='none';
 contentManagement.style.display='none';
+quoteManagement.style.display='none';
 }
 
 function showSiteSettings(){
@@ -933,6 +1290,7 @@ orderManagement.style.display='none';
 userManagement.style.display='none';
 siteSettings.style.display='block';
 contentManagement.style.display='none';
+quoteManagement.style.display='none';
 loadSiteSettings();
 }
 
@@ -943,7 +1301,20 @@ orderManagement.style.display='none';
 userManagement.style.display='none';
 siteSettings.style.display='none';
 contentManagement.style.display='block';
+quoteManagement.style.display='none';
 loadContentSettings();
+loadPaymentMethods();
+}
+
+function showQuoteManagement(){
+adminDashboard.style.display='none';
+currencyManagement.style.display='none';
+orderManagement.style.display='none';
+userManagement.style.display='none';
+siteSettings.style.display='none';
+contentManagement.style.display='none';
+quoteManagement.style.display='block';
+loadQuotes();
 }
 
 // ADMIN LOGIN CHECK
