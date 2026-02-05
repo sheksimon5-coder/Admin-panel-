@@ -1,4 +1,3 @@
-
 <html lang="bn">
 <head>
 <meta charset="utf-8" />
@@ -193,6 +192,10 @@ input:checked + .slider:before{transform:translateX(26px)}
 <input id="newCurrencyId" placeholder="Payment ID" />
 <input id="newCurrencyImage" placeholder="Image URL" />
 </div>
+<div class="control-row">
+<input id="newCurrencyMinDollar" type="number" placeholder="Minimum Dollar (ডিফল্ট: 1)" />
+<input id="newCurrencyMaxDollar" type="number" placeholder="Maximum Dollar (ডিফল্ট: 1000)" />
+</div>
 <button class="primary" onclick="addCurrency()">Add Currency</button>
 </div>
 </div>
@@ -303,11 +306,11 @@ input:checked + .slider:before{transform:translateX(26px)}
 <!-- Fees & Limits Settings -->
 <div id="fees" class="form-section">
 <div>
-<label>Minimum Dollar Amount</label>
+<label>Global Minimum Dollar Amount (Default)</label>
 <input id="minDollarAmount" type="number" placeholder="Minimum Dollar Amount" />
 </div>
 <div>
-<label>Maximum Dollar Amount</label>
+<label>Global Maximum Dollar Amount (Default)</label>
 <input id="maxDollarAmount" type="number" placeholder="Maximum Dollar Amount" />
 </div>
 <div>
@@ -488,9 +491,36 @@ const adminLogin = document.getElementById('adminLogin');
 
 // DEFAULT CURRENCIES - Updated with separate buy and sell rates
 let currencies = [
-{ id: 'Payeer', name: 'Payeer', buyRate: 68, sellRate: 70, paymentId: 'P1131698605', image: 'https://i.ibb.co/6yJ1s7Q/payeer-logo.png' },
-{ id: 'Binance', name: 'Binance', buyRate: 19, sellRate: 20, paymentId: '1188473082', image: 'https://i.ibb.co/k3QJz5w/binance-logo.png' },
-{ id: 'Advcash', name: 'Advcash', buyRate: 58, sellRate: 60, paymentId: 'U 1048 5654 4714', image: 'https://i.ibb.co/1n1J7r6/advcash-logo.png' }
+{ 
+  id: 'Payeer', 
+  name: 'Payeer', 
+  buyRate: 68, 
+  sellRate: 70, 
+  paymentId: 'P1131698605', 
+  image: 'https://i.ibb.co/6yJ1s7Q/payeer-logo.png',
+  minDollar: 5,
+  maxDollar: 500
+},
+{ 
+  id: 'Binance', 
+  name: 'Binance', 
+  buyRate: 19, 
+  sellRate: 20, 
+  paymentId: '1188473082', 
+  image: 'https://i.ibb.co/k3QJz5w/binance-logo.png',
+  minDollar: 1,
+  maxDollar: 1000
+},
+{ 
+  id: 'Advcash', 
+  name: 'Advcash', 
+  buyRate: 58, 
+  sellRate: 60, 
+  paymentId: 'U 1048 5654 4714', 
+  image: 'https://i.ibb.co/1n1J7r6/advcash-logo.png',
+  minDollar: 10,
+  maxDollar: 300
+}
 ];
 
 // DEFAULT PAYMENT METHODS
@@ -558,7 +588,13 @@ async function loadCurrencies(){
 try {
 const currenciesDoc = await db.collection('settings').doc('currencies').get();
 if (currenciesDoc.exists) {
-currencies = currenciesDoc.data().list || currencies;
+const loadedCurrencies = currenciesDoc.data().list || currencies;
+// প্রতিটি কারেন্সির জন্য ডিফল্ট লিমিট সেট করুন যদি না থাকে
+currencies = loadedCurrencies.map(currency => ({
+  ...currency,
+  minDollar: currency.minDollar || 1,
+  maxDollar: currency.maxDollar || 1000
+}));
 }
 } catch (error) {
 console.error("Error loading currencies:", error);
@@ -592,6 +628,7 @@ item.innerHTML = `
 <div class="small">Buy Rate: 1 USD = ${currency.buyRate || currency.rate} Tk</div>
 <div class="small">Sell Rate: 1 USD = ${currency.sellRate || currency.rate} Tk</div>
 <div class="small">Payment ID: ${currency.paymentId}</div>
+<div class="small">Minimum: ${currency.minDollar || 1} USD, Maximum: ${currency.maxDollar || 1000} USD</div>
  ${currency.image ? `<div class="small">Image: ${currency.image}</div>` : ''}
 </div>
 <div class="currency-actions">
@@ -609,6 +646,8 @@ const buyRate = parseFloat(document.getElementById('newCurrencyBuyRate').value);
 const sellRate = parseFloat(document.getElementById('newCurrencySellRate').value);
 const paymentId = document.getElementById('newCurrencyId').value.trim();
 const image = document.getElementById('newCurrencyImage').value.trim();
+const minDollar = parseFloat(document.getElementById('newCurrencyMinDollar').value);
+const maxDollar = parseFloat(document.getElementById('newCurrencyMaxDollar').value);
 
 if (!name || isNaN(buyRate) || isNaN(sellRate) || !paymentId) {
 alert('Please fill all required fields');
@@ -624,7 +663,16 @@ alert('Currency with this name already exists');
 return;
 }
 
-currencies.push({ id, name, buyRate, sellRate, paymentId, image });
+currencies.push({ 
+  id, 
+  name, 
+  buyRate, 
+  sellRate, 
+  paymentId, 
+  image,
+  minDollar: minDollar || 1,
+  maxDollar: maxDollar || 1000
+});
 saveCurrencies();
 loadCurrencies();
 
@@ -634,6 +682,8 @@ document.getElementById('newCurrencyBuyRate').value = '';
 document.getElementById('newCurrencySellRate').value = '';
 document.getElementById('newCurrencyId').value = '';
 document.getElementById('newCurrencyImage').value = '';
+document.getElementById('newCurrencyMinDollar').value = '';
+document.getElementById('newCurrencyMaxDollar').value = '';
 }
 
 function editCurrency(index){
@@ -653,13 +703,21 @@ if (newPaymentId === null) return;
 const newImage = prompt('Image URL:', currency.image || '');
 if (newImage === null) return;
 
+const newMinDollar = prompt('Minimum Dollar Amount:', currency.minDollar || 1);
+if (newMinDollar === null) return;
+
+const newMaxDollar = prompt('Maximum Dollar Amount:', currency.maxDollar || 1000);
+if (newMaxDollar === null) return;
+
 currencies[index] = {
 ...currency,
 name: newName,
 buyRate: parseFloat(newBuyRate),
 sellRate: parseFloat(newSellRate),
 paymentId: newPaymentId,
-image: newImage
+image: newImage,
+minDollar: parseFloat(newMinDollar),
+maxDollar: parseFloat(newMaxDollar)
 };
 
 saveCurrencies();
