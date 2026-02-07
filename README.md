@@ -1,1 +1,1916 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Dollar Exchange - Admin Panel</title>
+<link rel="manifest" href="/manifest.json">
+<style>
+body{font-family: sans-serif;background:#f2f5f8;margin:0;color:#111}
+.topbar{background:#fff;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 6px rgba(0,0,0,0.06)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo img{width:44px;height:44px;border-radius:8px;object-fit:cover}
+.status-badge{padding:6px 12px;border-radius:8px;color:#fff;font-size:14px;font-weight:700}
+.top-buttons{display:flex;gap:8px}
+.top-buttons button{padding:6px 12px;border-radius:20px;border:1px solid #0b75ff;background:#fff;color:#0b75ff;font-weight:700}
 
+.blue-head{background:linear-gradient(180deg,#0037dd,#006bff);padding:36px 18px;text-align:center;border-bottom-left-radius:26px;border-bottom-right-radius:26px;color:#fff}
+.blue-head h1{margin:0;font-size:26px;letter-spacing:0.2px}
+
+.card{width:92%;max-width:720px;margin:14px auto;background:#fff;padding:14px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.06)}
+
+input,select,button,textarea{width:100%;padding:10px;margin:8px 0;border-radius:8px;border:1px solid #ddd;font-size:15px}
+button.primary{background:#0b75ff;color:#fff;border:none;padding:11px;border-radius:8px;cursor:pointer}
+button.danger{background:#ef4444;color:#fff;border:none;padding:11px;border-radius:8px;cursor:pointer}
+button.success{background:#16a34a;color:#fff;border:none;padding:11px;border-radius:8px;cursor:pointer}
+button.warning{background:#f59e0b;color:#fff;border:none;padding:11px;border-radius:8px;cursor:pointer}
+
+.order-box{background:#fff;margin:10px;border-radius:10px;padding:12px;box-shadow:0 1px 6px rgba(0,0,0,0.06);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.order-info{flex:1}
+.order-meta{min-width:110px;text-align:right}
+.status{padding:6px 10px;border-radius:6px;color:#fff;font-weight:700}
+.pending{background:#f59e0b}
+.completed{background:#16a34a}
+.rejected{background:#ef4444}
+
+.small{font-size:13px;color:#666}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;justify-content:center;align-items:flex-end;padding:20px;z-index:999}
+.modal .box{width:100%;max-width:520px;background:#fff;border-radius:12px;padding:16px}
+
+.id-badge{background:#f3f4f6;padding:8px;border-radius:8px;display:inline-block;width:100%}
+.order-empty{text-align:center;color:#6b7280;padding:26px}
+
+.control-row{display:flex;gap:10px}
+.control-row > *{flex:1}
+
+.currency-item{background:#f9fafb;padding:10px;border-radius:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.currency-info{flex:1}
+.currency-actions{display:flex;gap:5px}
+
+.quote-item{background:#f9fafb;padding:15px;border-radius:8px;margin-bottom:15px;position:relative}
+.quote-text{font-style:italic;margin-bottom:10px;color:#333}
+.quote-author{font-weight:bold;text-align:right;color:#666}
+.quote-actions{position:absolute;top:10px;right:10px;display:flex;gap:5px}
+
+.tab-container{display:flex;overflow-x:auto;margin-bottom:10px}
+.tab-button{padding:10px 15px;background:#f3f4f6;border:none;border-bottom:3px solid transparent;cursor:pointer;white-space:nowrap}
+.tab-button.active{border-bottom-color:#0b75ff;background:#e5f0ff}
+
+.form-section{display:none}
+.form-section.active{display:block}
+
+.color-preview{width:30px;height:30px;border-radius:4px;display:inline-block;margin-left:10px;border:1px solid #ddd}
+
+.toggle-switch{position:relative;display:inline-block;width:60px;height:34px}
+.toggle-switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:#ccc;transition:.4s;border-radius:34px}
+.slider:before{position:absolute;content:"";height:26px;width:26px;left:4px;bottom:4px;background-color:white;transition:.4s;border-radius:50%}
+input:checked + .slider{background-color:#0b75ff}
+input:checked + .slider:before{transform:translateX(26px)}
+
+.trade-type-toggle {
+  display: flex;
+  background: #f1f5f9;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 15px 0;
+}
+
+.trade-type-toggle button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.trade-type-toggle button.active {
+  background: #0b75ff;
+  color: white;
+}
+
+.trade-type-toggle button:first-child {
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+.trade-type-toggle button:last-child {
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+}
+
+/* NOTIFICATION STYLES */
+.notification-bell {
+  position: relative;
+  cursor: pointer;
+  margin-right: 15px;
+  font-size: 24px;
+}
+
+.notification-bell .badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ef4444;
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#notificationContainer {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  z-index: 10000;
+  max-width: 350px;
+}
+
+.notification-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  margin-bottom: 10px;
+  overflow: hidden;
+  animation: slideIn 0.3s ease-out;
+  border-left: 4px solid #0b75ff;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.notification-card:hover {
+  transform: translateY(-2px);
+}
+
+.notification-card.new {
+  border-left-color: #ef4444;
+  background: #fff5f5;
+}
+
+.notification-header {
+  padding: 12px 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.notification-header h4 {
+  margin: 0;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notification-body {
+  padding: 15px;
+}
+
+.notification-body p {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.4;
+}
+
+.notification-time {
+  font-size: 11px;
+  color: #666;
+  text-align: right;
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 20px;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.notification-close:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Notification modal */
+.notification-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.notification-modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.notification-list {
+  max-height: 400px;
+  overflow-y: auto;
+  margin: 15px 0;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.notification-item {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e5e7eb;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item:hover {
+  background: #f9fafb;
+}
+
+.notification-item.unread {
+  background: #eff6ff;
+  border-left: 3px solid #3b82f6;
+}
+
+.notification-title {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notification-message {
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 5px;
+  line-height: 1.4;
+}
+
+.notification-date {
+  font-size: 11px;
+  color: #9ca3af;
+  text-align: right;
+}
+
+/* Online/Offline status */
+.online { background: #16a34a; }
+.offline { background: #ef4444; }
+
+/* Settings styles */
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 10px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+.setting-item label {
+  font-weight: 500;
+  color: #334155;
+}
+
+.sound-test-btn {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.sound-test-btn:hover {
+  background: #059669;
+}
+
+@media (max-width:520px){
+  .topbar{padding:8px}
+  .blue-head{padding:24px 12px}
+  #notificationContainer {
+    top: 60px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+  .notification-modal-content {
+    width: 95%;
+    padding: 15px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Notification Container -->
+<div id="notificationContainer"></div>
+
+<!-- Notification Modal -->
+<div id="notificationModal" class="notification-modal">
+  <div class="notification-modal-content">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px">
+      <h3 style="margin:0;display:flex;align-items:center;gap:10px">🔔 নোটিফিকেশন</h3>
+      <button onclick="clearAllNotifications()" class="danger" style="padding:5px 10px;font-size:12px;">সব মুছুন</button>
+    </div>
+    
+    <div id="notificationList" class="notification-list">
+      <!-- Notifications will be loaded here -->
+    </div>
+    
+    <div style="display:flex;justify-content:space-between;margin-top:15px">
+      <button onclick="markAllAsRead()" class="primary">সব পড়া মার্ক করুন</button>
+      <button onclick="closeNotificationModal()" class="danger">বন্ধ করুন</button>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Login -->
+<div id="adminLogin" class="modal" style="display:none;">
+<div class="box">
+<h3>Admin Login</h3>
+<input id="adminEmail" type="email" placeholder="Admin Gmail">
+<input id="adminPass" type="password" placeholder="Enter Password">
+<div style="display:flex; align-items:center; margin:10px 0;">
+<input type="checkbox" id="rememberMe" checked style="width:auto; margin-right:8px;">
+<label for="rememberMe">Keep me logged in</label>
+</div>
+<button class="primary" onclick="checkAdmin()">Login</button>
+<div style="text-align:right;margin-top:8px"><button onclick="window.location.href='index.html'">Go to User Panel</button></div>
+</div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+<div class="logo">
+<img src="https://i.ibb.co.com/DD3h4qjv/file-000000007d947207b10fa3593fc67aa8.png" alt="logo">
+<div>
+<div style="font-size:16px;font-weight:800;color:#0037dd">Dollar Exchange - Admin</div>
+<div class="small">Fast & Secure Exchange</div>
+</div>
+</div>
+
+<div style="display:flex;align-items:center;gap:15px">
+<!-- Notification Bell -->
+<div class="notification-bell" onclick="showNotificationModal()">
+  🔔
+  <div id="notificationBadge" class="badge" style="display:none;">0</div>
+</div>
+
+<div id="opStatus" class="status-badge offline">Offline</div>
+
+<div class="top-buttons">
+<button onclick="window.location.href='index.html'">User Panel</button>
+<button onclick="logoutAdmin()">Logout</button>
+</div>
+</div>
+</div>
+
+<div class="blue-head">
+<h1>Admin Panel</h1>
+<p class="small">Manage your currency exchange platform</p>
+</div>
+
+<!-- ADMIN AREA -->
+<div id="adminArea" style="display:none;">
+<h2 style="text-align:center;margin-top:18px">🛠 Admin Panel</h2>
+
+<!-- Admin Navigation -->
+<div class="card">
+<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+<button class="primary" onclick="showAdminDashboard()">Dashboard</button>
+<button class="primary" onclick="showCurrencyManagement()">Currency Management</button>
+<button class="primary" onclick="showOrderManagement()">Order Management</button>
+<button class="primary" onclick="showUserManagement()">User Management</button>
+<button class="primary" onclick="showSiteSettings()">Site Settings</button>
+<button class="primary" onclick="showContentManagement()">Content Management</button>
+<button class="primary" onclick="showQuoteManagement()">Quote Management</button>
+<button class="warning" onclick="testNotification()">Test Notification</button>
+</div>
+</div>
+
+<!-- Admin Dashboard -->
+<div id="adminDashboard" class="card">
+<h3>📊 Admin Dashboard</h3>
+<div id="dashboardStats">
+<!-- Stats will be loaded here -->
+</div>
+</div>
+
+<!-- Currency Management -->
+<div id="currencyManagement" class="card" style="display:none;">
+<h3>💱 Currency Management</h3>
+<div id="currencyList">
+<!-- Currencies will be loaded here -->
+</div>
+
+<div style="margin-top:20px">
+<h4>Add New Currency</h4>
+<div class="control-row">
+<input id="newCurrencyName" placeholder="Currency Name" />
+</div>
+<div class="control-row">
+<input id="newCurrencyBuyRate" type="number" placeholder="Buy Rate (1 USD = ? Tk)" />
+<input id="newCurrencySellRate" type="number" placeholder="Sell Rate (1 USD = ? Tk)" />
+</div>
+<div class="control-row">
+<input id="newCurrencyId" placeholder="Payment ID" />
+<input id="newCurrencyImage" placeholder="Image URL" />
+</div>
+<div class="control-row">
+<input id="newCurrencyMinDollar" type="number" placeholder="Minimum Dollar (ডিফল্ট: 1)" />
+<input id="newCurrencyMaxDollar" type="number" placeholder="Maximum Dollar (ডিফল্ট: 1000)" />
+</div>
+<button class="primary" onclick="addCurrency()">Add Currency</button>
+</div>
+</div>
+
+<!-- Order Management -->
+<div id="orderManagement" class="card" style="display:none;">
+<h3>📦 Order Management</h3>
+<div style="margin-bottom:10px"><b>Search by user number:</b>
+<input id="adminSearch" placeholder="phone number" oninput="loadAdminOrders()" />
+</div>
+<div id="adminOrders"></div>
+</div>
+
+<!-- User Management -->
+<div id="userManagement" class="card" style="display:none;">
+<h3>👥 User Management</h3>
+<div style="margin-bottom:10px"><b>Search by email or number:</b>
+<input id="userSearch" placeholder="email or phone number" oninput="searchUsers()" />
+</div>
+<div id="userList"></div>
+</div>
+
+<!-- Site Settings -->
+<div id="siteSettings" class="card" style="display:none;">
+<h3>⚙️ Site Settings</h3>
+
+<div class="tab-container">
+<button class="tab-button active" onclick="showTab('general')">General</button>
+<button class="tab-button" onclick="showTab('operations')">Operations</button>
+<button class="tab-button" onclick="showTab('contact')">Contact</button>
+<button class="tab-button" onclick="showTab('fees')">Fees & Limits</button>
+<button class="tab-button" onclick="showTab('ui')">UI Customization</button>
+<button class="tab-button" onclick="showTab('notifications')">Notifications</button>
+</div>
+
+<!-- General Settings -->
+<div id="general" class="form-section active">
+<div>
+<label>Site Status Message</label>
+<input id="siteStatus" placeholder="Status message" />
+</div>
+<div>
+<label>Site Name</label>
+<input id="siteName" placeholder="Site Name" />
+</div>
+<div>
+<label>Tagline</label>
+<input id="siteTagline" placeholder="Tagline" />
+</div>
+<div>
+<label>Maintenance Mode</label>
+<label class="toggle-switch">
+<input type="checkbox" id="maintenanceMode">
+<span class="slider"></span>
+</label>
+</div>
+<div>
+<label>Maintenance Message</label>
+<textarea id="maintenanceMessage" rows="3" placeholder="Message to show during maintenance"></textarea>
+</div>
+</div>
+
+<!-- Operations Settings -->
+<div id="operations" class="form-section">
+<div>
+<label>Working Hours</label>
+<div class="control-row">
+<input id="workStartHour" type="number" min="0" max="23" placeholder="Start Hour (0-23)" />
+<input id="workEndHour" type="number" min="0" max="23" placeholder="End Hour (0-23)" />
+</div>
+</div>
+<div>
+<label>Current Status Override</label>
+<select id="statusOverride">
+<option value="">Use Automatic</option>
+<option value="online">Force Online</option>
+<option value="offline">Force Offline</option>
+</select>
+</div>
+<div>
+<label>Order Instructions</label>
+<textarea id="orderInstructions" rows="3" placeholder="Instructions shown to users before placing an order"></textarea>
+</div>
+<div>
+<label>Require Login for Orders</label>
+<label class="toggle-switch">
+<input type="checkbox" id="requireLogin">
+<span class="slider"></span>
+</label>
+</div>
+</div>
+
+<!-- Contact Settings -->
+<div id="contact" class="form-section">
+<div>
+<label>WhatsApp Link</label>
+<input id="whatsappLink" placeholder="WhatsApp Link" />
+</div>
+<div>
+<label>Contact Email</label>
+<input id="contactEmail" placeholder="Contact Email" />
+</div>
+<div>
+<label>Contact Phone</label>
+<input id="contactPhone" placeholder="Contact Phone" />
+</div>
+</div>
+
+<!-- Fees & Limits Settings -->
+<div id="fees" class="form-section">
+<div>
+<label>Global Minimum Dollar Amount (Default)</label>
+<input id="minDollarAmount" type="number" placeholder="Minimum Dollar Amount" />
+</div>
+<div>
+<label>Global Maximum Dollar Amount (Default)</label>
+<input id="maxDollarAmount" type="number" placeholder="Maximum Dollar Amount" />
+</div>
+<div>
+<label>Transaction Fee (Fixed)</label>
+<input id="transactionFee" type="number" placeholder="Transaction Fee" />
+</div>
+<div>
+<label>Transaction Fee (%)</label>
+<input id="transactionFeePercent" type="number" step="0.01" placeholder="Transaction Fee Percentage" />
+</div>
+</div>
+
+<!-- UI Customization Settings -->
+<div id="ui" class="form-section">
+<div>
+<label>Primary Color</label>
+<div style="display:flex;align-items:center">
+<input id="primaryColor" type="color" />
+<span id="primaryColorPreview" class="color-preview"></span>
+</div>
+</div>
+<div>
+<label>Secondary Color</label>
+<div style="display:flex;align-items:center">
+<input id="secondaryColor" type="color" />
+<span id="secondaryColorPreview" class="color-preview"></span>
+</div>
+</div>
+<div>
+<label>Logo URL</label>
+<input id="logoUrl" placeholder="Logo URL" />
+</div>
+<div>
+<label>Favicon URL</label>
+<input id="faviconUrl" placeholder="Favicon URL" />
+</div>
+<div>
+<label>Background Color</label>
+<div style="display:flex;align-items:center">
+<input id="backgroundColor" type="color" />
+<span id="backgroundColorPreview" class="color-preview"></span>
+</div>
+</div>
+</div>
+
+<!-- Notification Settings -->
+<div id="notifications" class="form-section">
+<div id="notificationSettingsContent">
+<!-- Notification settings will be loaded here -->
+</div>
+<button class="primary" onclick="saveNotificationSettings()">Save Notification Settings</button>
+</div>
+
+<button class="primary" onclick="saveSiteSettings()">Save All Settings</button>
+</div>
+
+<!-- Content Management -->
+<div id="contentManagement" class="card" style="display:none;">
+<h3>📝 Content Management</h3>
+
+<div class="tab-container">
+<button class="tab-button active" onclick="showContentTab('home')">Home Page</button>
+<button class="tab-button" onclick="showContentTab('rules')">Rules & Instructions</button>
+<button class="tab-button" onclick="showContentTab('payment-content')">Payment Methods</button>
+</div>
+
+<!-- Home Page Content -->
+<div id="home" class="form-section active">
+<div>
+<label>Welcome Title</label>
+<input id="welcomeTitle" placeholder="Welcome Title" />
+</div>
+<div>
+<label>Welcome Subtitle</label>
+<input id="welcomeSubtitle" placeholder="Welcome Subtitle" />
+</div>
+<div>
+<label>Navigation Button Text</label>
+<input id="navButtonText" placeholder="Navigation Button Text" />
+</div>
+<div>
+<label>Home Page Content</label>
+<textarea id="homeContent" rows="6" placeholder="Home Page Content"></textarea>
+</div>
+</div>
+
+<!-- Rules & Instructions Content -->
+<div id="rules" class="form-section">
+<div>
+<label>Rules Title</label>
+<input id="rulesTitle" placeholder="Rules Title" />
+</div>
+<div>
+<label>Rules Content</label>
+<textarea id="rulesContent" rows="6" placeholder="Rules & Instructions Content"></textarea>
+</div>
+</div>
+
+<!-- Payment Methods Management -->
+<div id="payment-content" class="form-section">
+<div id="paymentMethodsList">
+<!-- Payment methods will be loaded here -->
+</div>
+
+<div style="margin-top:20px">
+<h4>Add New Payment Method</h4>
+<div class="control-row">
+<input id="newPaymentName" placeholder="Payment Method Name" />
+<input id="newPaymentFee" type="number" step="0.01" placeholder="Fee (%)" />
+</div>
+<button class="primary" onclick="addPaymentMethod()">Add Payment Method</button>
+</div>
+</div>
+
+<button class="primary" onclick="saveContentSettings()">Save Content</button>
+</div>
+
+<!-- Quote Management -->
+<div id="quoteManagement" class="card" style="display:none;">
+<h3>💬 Quote Management</h3>
+<div id="quotesList">
+<!-- Quotes will be loaded here -->
+</div>
+
+<div style="margin-top:20px">
+<h4>Add New Quote</h4>
+<textarea id="newQuoteText" rows="3" placeholder="Enter quote text"></textarea>
+<input id="newQuoteAuthor" placeholder="Author name (optional)" />
+<div class="control-row">
+<label style="margin-top:10px">
+<input type="checkbox" id="newQuoteFeatured" style="width:auto; margin-right:8px;">
+Mark as Featured
+</label>
+</div>
+<button class="primary" onclick="addQuote()">Add Quote</button>
+</div>
+</div>
+
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script>
+// ===============================
+// FIREBASE CONFIGURATION
+// ===============================
+const firebaseConfig = {
+  apiKey: "AIzaSyCE57xIZr1igoPT7EkpDz0SIVYvFHle97U",
+  authDomain: "dollar-exchange-bdt-fa179.firebaseapp.com",
+  projectId: "dollar-exchange-bdt-fa179",
+  storageBucket: "dollar-exchange-bdt-fa179.firebasestorage.app",
+  messagingSenderId: "294819905234",
+  appId: "1:294819905234:web:4da06ee71d54daeb40770b"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// ===============================
+// NOTIFICATION SYSTEM
+// ===============================
+let notifications = [];
+let unreadCount = 0;
+let orderListener = null;
+
+// Load notifications from localStorage
+function loadNotifications() {
+  try {
+    const saved = localStorage.getItem('adminNotifications');
+    if (saved) {
+      notifications = JSON.parse(saved);
+      updateUnreadCount();
+    }
+  } catch (e) {
+    console.error('Error loading notifications:', e);
+    notifications = [];
+  }
+}
+
+// Save notifications to localStorage
+function saveNotifications() {
+  try {
+    localStorage.setItem('adminNotifications', JSON.stringify(notifications));
+    updateUnreadCount();
+  } catch (e) {
+    console.error('Error saving notifications:', e);
+  }
+}
+
+// Update unread count badge
+function updateUnreadCount() {
+  unreadCount = notifications.filter(n => !n.read).length;
+  const badge = document.getElementById('notificationBadge');
+  if (badge) {
+    if (unreadCount > 0) {
+      badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+      badge.style.display = 'flex';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+}
+
+// Add new notification
+function addNotification(type, title, message, data = {}) {
+  const notification = {
+    id: Date.now().toString(),
+    type: type,
+    title: title,
+    message: message,
+    data: data,
+    read: false,
+    timestamp: new Date().toISOString(),
+    date: new Date().toLocaleDateString('bn-BD'),
+    time: new Date().toLocaleTimeString('bn-BD', { hour: '2-digit', minute: '2-digit' })
+  };
+  
+  notifications.unshift(notification);
+  if (notifications.length > 100) {
+    notifications = notifications.slice(0, 100);
+  }
+  
+  saveNotifications();
+  showInPageNotification(notification);
+  playNotificationSound();
+  
+  return notification;
+}
+
+// Show in-page notification card
+function showInPageNotification(notification) {
+  const container = document.getElementById('notificationContainer');
+  if (!container) return;
+  
+  const card = document.createElement('div');
+  card.className = `notification-card ${notification.read ? '' : 'new'}`;
+  card.id = `notif-${notification.id}`;
+  card.innerHTML = `
+    <div class="notification-header">
+      <h4>${getNotificationIcon(notification.type)} ${notification.title}</h4>
+      <button class="notification-close" onclick="removeNotificationCard('${notification.id}')">×</button>
+    </div>
+    <div class="notification-body">
+      <p>${notification.message}</p>
+      <div class="notification-time">${notification.time}</div>
+    </div>
+  `;
+  
+  card.onclick = () => {
+    handleNotificationClick(notification);
+    removeNotificationCard(notification.id);
+  };
+  
+  container.appendChild(card);
+  
+  // Auto remove after 8 seconds
+  setTimeout(() => {
+    removeNotificationCard(notification.id);
+  }, 8000);
+}
+
+// Get notification icon
+function getNotificationIcon(type) {
+  const icons = {
+    'new_order': '📦',
+    'status_change': '🔄',
+    'system': '⚙️',
+    'warning': '⚠️',
+    'success': '✅',
+    'error': '❌'
+  };
+  return icons[type] || '🔔';
+}
+
+// Remove notification card
+function removeNotificationCard(id) {
+  const card = document.getElementById(`notif-${id}`);
+  if (card) {
+    card.style.animation = 'slideOut 0.3s ease-in';
+    setTimeout(() => {
+      if (card.parentElement) {
+        card.remove();
+      }
+    }, 300);
+  }
+}
+
+// Play notification sound
+function playNotificationSound() {
+  const soundEnabled = localStorage.getItem('notificationSound') !== 'false';
+  if (!soundEnabled) return;
+  
+  try {
+    const audio = new Audio();
+    const hour = new Date().getHours();
+    
+    // Day time sound
+    if (hour >= 6 && hour < 22) {
+      audio.src = 'https://assets.mixkit.co/sfx/preview/mixkit-correct-answer-tone-2870.mp3';
+    } else {
+      // Night time - softer sound
+      audio.src = 'https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3';
+    }
+    
+    const volume = parseFloat(localStorage.getItem('soundVolume')) || 0.5;
+    audio.volume = volume;
+    audio.play().catch(e => console.log('Sound play failed:', e));
+  } catch (error) {
+    console.error('Error playing sound:', error);
+  }
+}
+
+// Test sound
+function testNotificationSound() {
+  playNotificationSound();
+}
+
+// Handle notification click
+function handleNotificationClick(notification) {
+  markAsRead(notification.id);
+  
+  switch (notification.type) {
+    case 'new_order':
+      showOrderManagement();
+      if (notification.data.phone) {
+        document.getElementById('adminSearch').value = notification.data.phone;
+        loadAdminOrders();
+      }
+      break;
+    case 'status_change':
+      showOrderManagement();
+      break;
+  }
+}
+
+// Mark as read
+function markAsRead(id) {
+  const index = notifications.findIndex(n => n.id === id);
+  if (index !== -1) {
+    notifications[index].read = true;
+    saveNotifications();
+  }
+}
+
+// Mark all as read
+function markAllAsRead() {
+  notifications.forEach(n => n.read = true);
+  saveNotifications();
+  updateNotificationModal();
+}
+
+// Show notification modal
+function showNotificationModal() {
+  document.getElementById('notificationModal').style.display = 'flex';
+  updateNotificationModal();
+}
+
+// Close notification modal
+function closeNotificationModal() {
+  document.getElementById('notificationModal').style.display = 'none';
+}
+
+// Update notification modal
+function updateNotificationModal() {
+  const container = document.getElementById('notificationList');
+  if (!container) return;
+  
+  container.innerHTML = '';
+  
+  if (notifications.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:30px;color:#6b7280;font-style:italic">কোন নোটিফিকেশন নেই</div>';
+    return;
+  }
+  
+  notifications.forEach(notification => {
+    const item = document.createElement('div');
+    item.className = `notification-item ${notification.read ? '' : 'unread'}`;
+    item.innerHTML = `
+      <div class="notification-title">${getNotificationIcon(notification.type)} ${notification.title}</div>
+      <div class="notification-message">${notification.message}</div>
+      <div class="notification-date">${notification.date} ${notification.time}</div>
+    `;
+    
+    item.onclick = () => {
+      handleNotificationClick(notification);
+      item.className = 'notification-item';
+    };
+    
+    container.appendChild(item);
+  });
+}
+
+// Clear all notifications
+function clearAllNotifications() {
+  if (confirm('সব নোটিফিকেশন মুছে ফেলতে চান?')) {
+    notifications = [];
+    saveNotifications();
+    closeNotificationModal();
+  }
+}
+
+// Setup order listener
+function setupOrderListener() {
+  if (orderListener) return;
+  
+  orderListener = db.collection('orders')
+    .orderBy('createdAt', 'desc')
+     limit(10)
+    .onSnapshot((snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === 'added') {
+          const newOrder = change.doc.data();
+          const orderId = change.doc.id;
+          
+          const orderTime = new Date(newOrder.createdAt).getTime();
+          const currentTime = new Date().getTime();
+          const timeDiff = currentTime - orderTime;
+          
+          if (timeDiff < 30000) {
+            handleNewOrder(newOrder, orderId);
+          }
+        }
+      });
+    });
+}
+
+// Handle new order
+function handleNewOrder(order, orderId) {
+  const title = `নতুন অর্ডার #${orderId.substring(0, 6)}`;
+  const message = `
+    👤 ${order.name}
+    💰 ${order.dollar} USD → ${order.taka} টাকা
+    📱 ${order.currency}
+    📞 ${order.number}
+  `;
+  
+  addNotification('new_order', title, message, {
+    orderId: orderId,
+    phone: order.number,
+    name: order.name
+  });
+}
+
+// Show notification settings
+function showNotificationSettings() {
+  const soundEnabled = localStorage.getItem('notificationSound') !== 'false';
+  const volume = parseFloat(localStorage.getItem('soundVolume')) || 0.5;
+  
+  return `
+    <div style="background:#f8fafc;padding:15px;border-radius:8px;margin-bottom:15px">
+      <h4 style="margin-top:0">🔔 নোটিফিকেশন সেটিংস</h4>
+      
+      <div class="setting-item">
+        <label>নোটিফিকেশন চালু করুন</label>
+        <label class="toggle-switch">
+          <input type="checkbox" id="enableNotifications" ${soundEnabled ? 'checked' : ''}>
+          <span class="slider"></span>
+        </label>
+      </div>
+      
+      <div class="setting-item">
+        <label>সাউন্ড ভলিউম</label>
+        <input type="range" id="soundVolume" min="0" max="100" value="${volume * 100}" style="width:150px;">
+      </div>
+      
+      <div class="setting-item">
+        <label>টেস্ট সাউন্ড</label>
+        <button onclick="testNotificationSound()" class="sound-test-btn">প্লে করুন</button>
+      </div>
+      
+      <div class="setting-item">
+        <label>ব্রাউজার নোটিফিকেশন</label>
+        <button onclick="requestNotificationPermission()" class="primary" style="padding:5px 10px;font-size:12px;">
+          পারমিশন দিন
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+// Request notification permission
+function requestNotificationPermission() {
+  if (!('Notification' in window)) {
+    alert('এই ব্রাউজার নোটিফিকেশন সাপোর্ট করে না');
+    return;
+  }
+  
+  Notification.requestPermission().then(permission => {
+    if (permission === 'granted') {
+      alert('নোটিফিকেশন পারমিশন দেওয়া হয়েছে!');
+      addNotification('success', 'নোটিফিকেশন চালু হয়েছে', 'এখন থেকে নতুন অর্ডার আসলে নোটিফিকেশন পাবেন');
+    } else {
+      alert('নোটিফিকেশন পারমিশন দেওয়া হয়নি। ব্রাউজার সেটিংস থেকে পারমিশন দিতে হবে।');
+    }
+  });
+}
+
+// Save notification settings
+function saveNotificationSettings() {
+  const notificationsEnabled = document.getElementById('enableNotifications').checked;
+  const volume = parseInt(document.getElementById('soundVolume').value) / 100;
+  
+  localStorage.setItem('notificationSound', notificationsEnabled);
+  localStorage.setItem('soundVolume', volume);
+  
+  alert('নোটিফিকেশন সেটিংস সেভ হয়েছে!');
+  addNotification('system', 'সেটিংস সেভ হয়েছে', 'নোটিফিকেশন সেটিংস আপডেট করা হয়েছে');
+}
+
+// Test notification
+function testNotification() {
+  addNotification('new_order', 'টেস্ট নোটিফিকেশন', 
+    'এটি একটি টেস্ট নোটিফিকেশন। নতুন অর্ডার আসলে এমন নোটিফিকেশন পাবেন।',
+    { test: true }
+  );
+}
+
+// Initialize notification system
+function initNotificationSystem() {
+  loadNotifications();
+  setupOrderListener();
+  
+  // Request permission if not asked before
+  if ('Notification' in window && Notification.permission === 'default') {
+    setTimeout(() => {
+      Notification.requestPermission();
+    }, 2000);
+  }
+}
+
+// ===============================
+// ADMIN SYSTEM
+// ===============================
+const ADMIN_EMAIL = 'sheksimon5@gmail.com';
+const ADMIN_PASSWORD = 'saimon500@';
+
+let currencies = [
+  { 
+    id: 'Payeer', 
+    name: 'Payeer', 
+    buyRate: 68, 
+    sellRate: 70, 
+    paymentId: 'P1131698605', 
+    image: 'https://i.ibb.co/6yJ1s7Q/payeer-logo.png',
+    minDollar: 5,
+    maxDollar: 500
+  },
+  { 
+    id: 'Binance', 
+    name: 'Binance', 
+    buyRate: 19, 
+    sellRate: 20, 
+    paymentId: '1188473082', 
+    image: 'https://i.ibb.co/k3QJz5w/binance-logo.png',
+    minDollar: 1,
+    maxDollar: 1000
+  },
+  { 
+    id: 'Advcash', 
+    name: 'Advcash', 
+    buyRate: 58, 
+    sellRate: 60, 
+    paymentId: 'U 1048 5654 4714', 
+    image: 'https://i.ibb.co/1n1J7r6/advcash-logo.png',
+    minDollar: 10,
+    maxDollar: 300
+  }
+];
+
+let paymentMethods = [
+  { id: 'bKash', name: 'bKash', fee: 1.5 },
+  { id: 'Nagad', name: 'Nagad', fee: 1.5 },
+  { id: 'Rocket', name: 'Rocket', fee: 1.5 }
+];
+
+let quotes = [
+  { text: "The best time to plant a tree was 20 years ago. The second best time is now.", author: "Chinese Proverb", featured: true },
+  { text: "Money is a terrible master but an excellent servant.", author: "P.T. Barnum", featured: false }
+];
+
+// ONLINE/OFFLINE
+function updateStatus(){
+  const hour = new Date().getHours();
+  if(hour>=22 || hour<9){
+    opStatus.innerText='Offline';
+    opStatus.className='status-badge offline';
+  } else {
+    opStatus.innerText='Online';
+    opStatus.className='status-badge online';
+  }
+}
+setInterval(updateStatus,60000);
+updateStatus();
+
+// TAB FUNCTIONS
+function showTab(tabName) {
+  const tabs = document.querySelectorAll('.form-section');
+  tabs.forEach(tab => tab.classList.remove('active'));
+  document.getElementById(tabName).classList.add('active');
+  
+  const buttons = document.querySelectorAll('.tab-button');
+  buttons.forEach(button => button.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  if (tabName === 'notifications') {
+    document.getElementById('notificationSettingsContent').innerHTML = showNotificationSettings();
+  }
+}
+
+function showContentTab(tabName) {
+  const tabs = document.querySelectorAll('.form-section');
+  tabs.forEach(tab => tab.classList.remove('active'));
+  document.getElementById(tabName).classList.add('active');
+  
+  const buttons = document.querySelectorAll('.tab-button');
+  buttons.forEach(button => button.classList.remove('active'));
+  event.target.classList.add('active');
+}
+
+// CURRENCY MANAGEMENT
+async function loadCurrencies(){
+  try {
+    const currenciesDoc = await db.collection('settings').doc('currencies').get();
+    if (currenciesDoc.exists) {
+      const loadedCurrencies = currenciesDoc.data().list || currencies;
+      currencies = loadedCurrencies.map(currency => ({
+        ...currency,
+        minDollar: currency.minDollar || 1,
+        maxDollar: currency.maxDollar || 1000
+      }));
+    }
+  } catch (error) {
+    console.error("Error loading currencies:", error);
+  }
+  updateCurrencyList();
+}
+
+async function saveCurrencies(){
+  try {
+    await db.collection('settings').doc('currencies').set({ list: currencies });
+    alert("Currencies updated successfully");
+  } catch (error) {
+    console.error("Error saving currencies:", error);
+    alert("Error updating currencies. Please try again.");
+  }
+}
+
+function updateCurrencyList(){
+  const currencyList = document.getElementById('currencyList');
+  if (!currencyList) return;
+  
+  currencyList.innerHTML = '';
+  currencies.forEach((currency, index) => {
+    const item = document.createElement('div');
+    item.className = 'currency-item';
+    item.innerHTML = `
+      <div class="currency-info">
+        <div><b>${currency.name}</b></div>
+        <div class="small">Buy Rate: 1 USD = ${currency.buyRate} Tk</div>
+        <div class="small">Sell Rate: 1 USD = ${currency.sellRate} Tk</div>
+        <div class="small">Payment ID: ${currency.paymentId}</div>
+        <div class="small">Minimum: ${currency.minDollar} USD, Maximum: ${currency.maxDollar} USD</div>
+      </div>
+      <div class="currency-actions">
+        <button class="primary" onclick="editCurrency(${index})">Edit</button>
+        <button class="danger" onclick="deleteCurrency(${index})">Delete</button>
+      </div>
+    `;
+    currencyList.appendChild(item);
+  });
+}
+
+function addCurrency(){
+  const name = document.getElementById('newCurrencyName').value.trim();
+  const buyRate = parseFloat(document.getElementById('newCurrencyBuyRate').value);
+  const sellRate = parseFloat(document.getElementById('newCurrencySellRate').value);
+  const paymentId = document.getElementById('newCurrencyId').value.trim();
+  const image = document.getElementById('newCurrencyImage').value.trim();
+  const minDollar = parseFloat(document.getElementById('newCurrencyMinDollar').value) || 1;
+  const maxDollar = parseFloat(document.getElementById('newCurrencyMaxDollar').value) || 1000;
+
+  if (!name || isNaN(buyRate) || isNaN(sellRate) || !paymentId) {
+    alert('Please fill all required fields');
+    return;
+  }
+
+  const id = name.toLowerCase().replace(/\s+/g, '_');
+  if (currencies.find(c => c.id === id)) {
+    alert('Currency with this name already exists');
+    return;
+  }
+
+  currencies.push({ id, name, buyRate, sellRate, paymentId, image, minDollar, maxDollar });
+  saveCurrencies();
+  loadCurrencies();
+
+  document.getElementById('newCurrencyName').value = '';
+  document.getElementById('newCurrencyBuyRate').value = '';
+  document.getElementById('newCurrencySellRate').value = '';
+  document.getElementById('newCurrencyId').value = '';
+  document.getElementById('newCurrencyImage').value = '';
+  document.getElementById('newCurrencyMinDollar').value = '';
+  document.getElementById('newCurrencyMaxDollar').value = '';
+}
+
+function editCurrency(index){
+  const currency = currencies[index];
+  const newName = prompt('Currency name:', currency.name);
+  if (!newName) return;
+  
+  const newBuyRate = parseFloat(prompt('Buy Rate (1 USD = ? Tk):', currency.buyRate));
+  if (isNaN(newBuyRate)) return;
+  
+  const newSellRate = parseFloat(prompt('Sell Rate (1 USD = ? Tk):', currency.sellRate));
+  if (isNaN(newSellRate)) return;
+  
+  const newPaymentId = prompt('Payment ID:', currency.paymentId);
+  if (!newPaymentId) return;
+  
+  currencies[index] = { ...currency, name: newName, buyRate: newBuyRate, sellRate: newSellRate, paymentId: newPaymentId };
+  saveCurrencies();
+  loadCurrencies();
+}
+
+function deleteCurrency(index){
+  if (confirm('Are you sure you want to delete this currency?')) {
+    currencies.splice(index, 1);
+    saveCurrencies();
+    loadCurrencies();
+  }
+}
+
+// PAYMENT METHODS
+async function loadPaymentMethods(){
+  try {
+    const paymentMethodsDoc = await db.collection('settings').doc('paymentMethods').get();
+    if (paymentMethodsDoc.exists) {
+      paymentMethods = paymentMethodsDoc.data().list || paymentMethods;
+    }
+  } catch (error) {
+    console.error("Error loading payment methods:", error);
+  }
+  updatePaymentMethodsList();
+}
+
+async function savePaymentMethods(){
+  try {
+    await db.collection('settings').doc('paymentMethods').set({ list: paymentMethods });
+    alert("Payment methods updated successfully");
+  } catch (error) {
+    console.error("Error saving payment methods:", error);
+    alert("Error updating payment methods. Please try again.");
+  }
+}
+
+function updatePaymentMethodsList(){
+  const paymentMethodsList = document.getElementById('paymentMethodsList');
+  if (!paymentMethodsList) return;
+  
+  paymentMethodsList.innerHTML = '';
+  paymentMethods.forEach((method, index) => {
+    const item = document.createElement('div');
+    item.className = 'currency-item';
+    item.innerHTML = `
+      <div class="currency-info">
+        <div><b>${method.name}</b></div>
+        <div class="small">Fee: ${method.fee}%</div>
+      </div>
+      <div class="currency-actions">
+        <button class="primary" onclick="editPaymentMethod(${index})">Edit</button>
+        <button class="danger" onclick="deletePaymentMethod(${index})">Delete</button>
+      </div>
+    `;
+    paymentMethodsList.appendChild(item);
+  });
+}
+
+function addPaymentMethod(){
+  const name = document.getElementById('newPaymentName').value.trim();
+  const fee = parseFloat(document.getElementById('newPaymentFee').value);
+
+  if (!name || isNaN(fee)) {
+    alert('Please fill all fields');
+    return;
+  }
+
+  const id = name.toLowerCase().replace(/\s+/g, '_');
+  if (paymentMethods.find(m => m.id === id)) {
+    alert('Payment method with this name already exists');
+    return;
+  }
+
+  paymentMethods.push({ id, name, fee });
+  savePaymentMethods();
+  loadPaymentMethods();
+
+  document.getElementById('newPaymentName').value = '';
+  document.getElementById('newPaymentFee').value = '';
+}
+
+function editPaymentMethod(index){
+  const method = paymentMethods[index];
+  const newName = prompt('Payment method name:', method.name);
+  if (!newName) return;
+  
+  const newFee = parseFloat(prompt('Fee (%):', method.fee));
+  if (isNaN(newFee)) return;
+  
+  paymentMethods[index] = { ...method, name: newName, fee: newFee };
+  savePaymentMethods();
+  loadPaymentMethods();
+}
+
+function deletePaymentMethod(index){
+  if (confirm('Are you sure you want to delete this payment method?')) {
+    paymentMethods.splice(index, 1);
+    savePaymentMethods();
+    loadPaymentMethods();
+  }
+}
+
+// QUOTES
+async function loadQuotes(){
+  try {
+    const quotesDoc = await db.collection('settings').doc('quotes').get();
+    if (quotesDoc.exists) {
+      quotes = quotesDoc.data().list || quotes;
+    }
+  } catch (error) {
+    console.error("Error loading quotes:", error);
+  }
+  updateQuotesList();
+}
+
+async function saveQuotes(){
+  try {
+    await db.collection('settings').doc('quotes').set({ list: quotes });
+    alert("Quotes updated successfully");
+  } catch (error) {
+    console.error("Error saving quotes:", error);
+    alert("Error updating quotes. Please try again.");
+  }
+}
+
+function updateQuotesList(){
+  const quotesList = document.getElementById('quotesList');
+  if (!quotesList) return;
+  
+  quotesList.innerHTML = '';
+  quotes.forEach((quote, index) => {
+    const item = document.createElement('div');
+    item.className = 'quote-item';
+    item.innerHTML = `
+      <div class="quote-text">"${quote.text}"</div>
+      <div class="quote-author">- ${quote.author || 'Anonymous'}</div>
+      <div class="quote-actions">
+        ${quote.featured ? '<span style="background:#f59e0b;color:white;padding:2px 6px;border-radius:4px;font-size:12px;">Featured</span>' : ''}
+        <button class="primary" onclick="editQuote(${index})">Edit</button>
+        <button class="danger" onclick="deleteQuote(${index})">Delete</button>
+      </div>
+    `;
+    quotesList.appendChild(item);
+  });
+}
+
+function addQuote(){
+  const text = document.getElementById('newQuoteText').value.trim();
+  const author = document.getElementById('newQuoteAuthor').value.trim();
+  const featured = document.getElementById('newQuoteFeatured').checked;
+
+  if (!text) {
+    alert('Please enter quote text');
+    return;
+  }
+
+  quotes.push({ text, author, featured, createdAt: new Date().toISOString() });
+  saveQuotes();
+  loadQuotes();
+
+  document.getElementById('newQuoteText').value = '';
+  document.getElementById('newQuoteAuthor').value = '';
+  document.getElementById('newQuoteFeatured').checked = false;
+}
+
+function editQuote(index){
+  const quote = quotes[index];
+  const newText = prompt('Quote text:', quote.text);
+  if (!newText) return;
+  
+  const newAuthor = prompt('Author:', quote.author || '');
+  const newFeatured = confirm('Mark as featured?');
+  
+  quotes[index] = { ...quote, text: newText, author: newAuthor, featured: newFeatured };
+  saveQuotes();
+  loadQuotes();
+}
+
+function deleteQuote(index){
+  if (confirm('Are you sure you want to delete this quote?')) {
+    quotes.splice(index, 1);
+    saveQuotes();
+    loadQuotes();
+  }
+}
+
+// ORDER MANAGEMENT
+async function loadAdminOrders(){
+  try {
+    const q = document.getElementById('adminSearch').value.trim();
+    let ordersQuery = db.collection('orders');
+
+    if(q) {
+      ordersQuery = ordersQuery.where('number', '==', q);
+    }
+
+    const snapshot = await ordersQuery.get();
+    const orders = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+    orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const adminOrders = document.getElementById('adminOrders');
+    adminOrders.innerHTML="";
+
+    if(orders.length===0){
+      adminOrders.innerHTML='<div class="order-empty">কোন অর্ডার পাওয়া যায়নি</div>';
+      return;
+    }
+
+    orders.forEach(o=>{
+      const div=document.createElement('div');
+      div.className='order-box';
+      div.innerHTML=`
+        <div style="flex:1">
+          <b>${o.name}</b> <span class="small">• ${new Date(o.createdAt).toLocaleString()}</span>
+          <div class="small">নম্বার: ${o.number} • ${o.currency} • ${o.dollar} USD → ${o.taka} TK</div>
+          <div class="small">মাধ্যম: ${o.via || 'Not given'}</div>
+          <div>TXID: <span class="small">${o.trx||'—'}</span></div>
+          <div class="small">Trade Type: ${o.tradeType || 'sell'}</div>
+        </div>
+        <div style="min-width:150px;text-align:right">
+          <div><span class="status ${o.status==='Pending'?'pending':o.status==='COMPLETED'?'completed':'rejected'}">${o.status}</span></div>
+          <button onclick="adminChangeStatus('${o.id}','COMPLETED')" style="margin:2px;padding:5px">Approve</button>
+          <button onclick="adminChangeStatus('${o.id}','REJECTED')" style="margin:2px;padding:5px">Reject</button>
+        </div>
+      `;
+      adminOrders.appendChild(div);
+    });
+  } catch (error) {
+    console.error("Error loading admin orders:", error);
+    document.getElementById('adminOrders').innerHTML='<div class="order-empty">Error loading orders</div>';
+  }
+}
+
+async function adminChangeStatus(id,newStatus){
+  try {
+    if(newStatus==='COMPLETED') {
+      const orderDoc = await db.collection('orders').doc(id).get();
+      if (!orderDoc.exists) {
+        alert("Order not found");
+        return;
+      }
+      const orderData = orderDoc.data();
+      if(!orderData.trx || orderData.trx.trim()==''){
+        alert("⚠ TXID ছাড়া Approve করা যাবে না!");
+        return;
+      }
+    }
+
+    await db.collection('orders').doc(id).update({ status: newStatus });
+    loadAdminOrders();
+    alert("Status Updated");
+  } catch (error) {
+    console.error("Error updating status:", error);
+    alert("Error updating status. Please try again.");
+  }
+}
+
+// USER MANAGEMENT
+async function searchUsers(){
+  try {
+    const query = document.getElementById('userSearch').value.trim();
+    const userList = document.getElementById('userList');
+    userList.innerHTML = "";
+
+    if (!query) {
+      userList.innerHTML = '<div class="order-empty">Enter email or phone number to search</div>';
+      return;
+    }
+
+    const emailQuery = db.collection('users').where('email', '==', query.toLowerCase());
+    const numberQuery = db.collection('users').where('number', '==', query);
+    
+    const [emailSnapshot, numberSnapshot] = await Promise.all([
+      emailQuery.get(),
+      numberQuery.get()
+    ]);
+
+    const emailUsers = emailSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+    const numberUsers = numberSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+
+    const allUsers = [...emailUsers];
+    numberUsers.forEach(user => {
+      if (!allUsers.find(u => u.id === user.id)) {
+        allUsers.push(user);
+      }
+    });
+
+    if (allUsers.length === 0) {
+      userList.innerHTML = '<div class="order-empty">No users found</div>';
+      return;
+    }
+
+    allUsers.forEach(user => {
+      const div = document.createElement('div');
+      div.className = 'order-box';
+      div.innerHTML = `
+        <div style="flex:1">
+          <b>${user.name}</b> (${user.userType})
+          <div class="small">Email: ${user.email}</div>
+          <div class="small">Phone: ${user.number}</div>
+          <div class="small">Joined: ${new Date(user.createdAt).toLocaleString()}</div>
+        </div>
+        <div style="min-width:100px;text-align:right">
+          <button onclick="viewUserOrders('${user.number}')" style="margin:2px">View Orders</button>
+        </div>
+      `;
+      userList.appendChild(div);
+    });
+  } catch (error) {
+    console.error("Error searching users:", error);
+    document.getElementById('userList').innerHTML = '<div class="order-empty">Error searching users</div>';
+  }
+}
+
+async function viewUserOrders(number) {
+  showOrderManagement();
+  document.getElementById('adminSearch').value = number;
+  loadAdminOrders();
+}
+
+// DASHBOARD
+async function loadDashboard() {
+  try {
+    const [ordersSnapshot, usersSnapshot] = await Promise.all([
+      db.collection('orders').get(),
+      db.collection('users').get()
+    ]);
+    
+    const totalOrders = ordersSnapshot.size;
+    const pendingOrders = ordersSnapshot.docs.filter(doc => doc.data().status === 'PENDING').length;
+    const completedOrders = ordersSnapshot.docs.filter(doc => doc.data().status === 'COMPLETED').length;
+    const rejectedOrders = ordersSnapshot.docs.filter(doc => doc.data().status === 'REJECTED').length;
+    const totalUsers = usersSnapshot.size;
+    
+    let totalValue = 0;
+    ordersSnapshot.forEach(doc => {
+      const order = doc.data();
+      if (order.status === 'COMPLETED') {
+        totalValue += parseFloat(order.taka) || 0;
+      }
+    });
+
+    const dashboardStats = document.getElementById('dashboardStats');
+    dashboardStats.innerHTML = `
+      <div class="control-row">
+        <div class="card" style="text-align:center">
+          <h3>${totalOrders}</h3>
+          <p>Total Orders</p>
+        </div>
+        <div class="card" style="text-align:center">
+          <h3>${pendingOrders}</h3>
+          <p>Pending Orders</p>
+        </div>
+      </div>
+      <div class="control-row">
+        <div class="card" style="text-align:center">
+          <h3>${completedOrders}</h3>
+          <p>Completed Orders</p>
+        </div>
+        <div class="card" style="text-align:center">
+          <h3>${rejectedOrders}</h3>
+          <p>Rejected Orders</p>
+        </div>
+      </div>
+      <div class="control-row">
+        <div class="card" style="text-align:center">
+          <h3>${totalUsers}</h3>
+          <p>Total Users</p>
+        </div>
+        <div class="card" style="text-align:center">
+          <h3>${totalValue.toFixed(2)} Tk</h3>
+          <p>Total Transaction Value</p>
+        </div>
+      </div>
+    `;
+  } catch (error) {
+    console.error("Error loading dashboard:", error);
+    document.getElementById('dashboardStats').innerHTML = '<div class="order-empty">Error loading dashboard</div>';
+  }
+}
+
+// SITE SETTINGS
+async function loadSiteSettings() {
+  try {
+    const settingsDoc = await db.collection('settings').doc('site').get();
+    if (settingsDoc.exists) {
+      const settings = settingsDoc.data();
+      document.getElementById('siteStatus').value = settings.status || '';
+      document.getElementById('siteName').value = settings.name || '';
+      document.getElementById('siteTagline').value = settings.tagline || '';
+      document.getElementById('workStartHour').value = settings.workStartHour || 9;
+      document.getElementById('workEndHour').value = settings.workEndHour || 22;
+      document.getElementById('whatsappLink').value = settings.whatsappLink || 'https://wa.me/qr/DTBEJ472LPKOA1';
+      document.getElementById('contactEmail').value = settings.contactEmail || '';
+      document.getElementById('contactPhone').value = settings.contactPhone || '';
+    }
+  } catch (error) {
+    console.error("Error loading site settings:", error);
+  }
+}
+
+async function saveSiteSettings() {
+  try {
+    await db.collection('settings').doc('site').set({
+      status: document.getElementById('siteStatus').value,
+      name: document.getElementById('siteName').value,
+      tagline: document.getElementById('siteTagline').value,
+      workStartHour: parseInt(document.getElementById('workStartHour').value) || 9,
+      workEndHour: parseInt(document.getElementById('workEndHour').value) || 22,
+      whatsappLink: document.getElementById('whatsappLink').value,
+      contactEmail: document.getElementById('contactEmail').value,
+      contactPhone: document.getElementById('contactPhone').value,
+      updatedAt: new Date().toISOString()
+    });
+    alert("Site settings updated successfully");
+  } catch (error) {
+    console.error("Error saving site settings:", error);
+    alert("Error updating site settings. Please try again.");
+  }
+}
+
+// CONTENT SETTINGS
+async function loadContentSettings() {
+  try {
+    const contentDoc = await db.collection('settings').doc('content').get();
+    if (contentDoc.exists) {
+      const content = contentDoc.data();
+      document.getElementById('welcomeTitle').value = content.welcomeTitle || 'Welcome to Dollar Exchange';
+      document.getElementById('welcomeSubtitle').value = content.welcomeSubtitle || 'দয়া করে ট্রানজেকশন শুরু করার আগে নিয়মগুলো পড়ে নিন';
+      document.getElementById('navButtonText').value = content.navButtonText || 'নগদ বিকাশ 5 টাকা সেন্ড মানি ফি কেটে নেওয়া হয়';
+      document.getElementById('homeContent').value = content.homeContent || '';
+      document.getElementById('rulesTitle').value = content.rulesTitle || 'Exchange Rules';
+      document.getElementById('rulesContent').value = content.rulesContent || 'Please read all rules before making a transaction.';
+    }
+  } catch (error) {
+    console.error("Error loading content settings:", error);
+  }
+}
+
+async function saveContentSettings() {
+  try {
+    await db.collection('settings').doc('content').set({
+      welcomeTitle: document.getElementById('welcomeTitle').value,
+      welcomeSubtitle: document.getElementById('welcomeSubtitle').value,
+      navButtonText: document.getElementById('navButtonText').value,
+      homeContent: document.getElementById('homeContent').value,
+      rulesTitle: document.getElementById('rulesTitle').value,
+      rulesContent: document.getElementById('rulesContent').value,
+      updatedAt: new Date().toISOString()
+    });
+    alert("Content settings updated successfully");
+  } catch (error) {
+    console.error("Error saving content settings:", error);
+    alert("Error updating content settings. Please try again.");
+  }
+}
+
+// ADMIN NAVIGATION
+function showAdminDashboard(){
+  document.getElementById('adminDashboard').style.display='block';
+  document.getElementById('currencyManagement').style.display='none';
+  document.getElementById('orderManagement').style.display='none';
+  document.getElementById('userManagement').style.display='none';
+  document.getElementById('siteSettings').style.display='none';
+  document.getElementById('contentManagement').style.display='none';
+  document.getElementById('quoteManagement').style.display='none';
+  loadDashboard();
+}
+
+function showCurrencyManagement(){
+  document.getElementById('adminDashboard').style.display='none';
+  document.getElementById('currencyManagement').style.display='block';
+  document.getElementById('orderManagement').style.display='none';
+  document.getElementById('userManagement').style.display='none';
+  document.getElementById('siteSettings').style.display='none';
+  document.getElementById('contentManagement').style.display='none';
+  document.getElementById('quoteManagement').style.display='none';
+  updateCurrencyList();
+}
+
+function showOrderManagement(){
+  document.getElementById('adminDashboard').style.display='none';
+  document.getElementById('currencyManagement').style.display='none';
+  document.getElementById('orderManagement').style.display='block';
+  document.getElementById('userManagement').style.display='none';
+  document.getElementById('siteSettings').style.display='none';
+  document.getElementById('contentManagement').style.display='none';
+  document.getElementById('quoteManagement').style.display='none';
+  loadAdminOrders();
+}
+
+function showUserManagement(){
+  document.getElementById('adminDashboard').style.display='none';
+  document.getElementById('currencyManagement').style.display='none';
+  document.getElementById('orderManagement').style.display='none';
+  document.getElementById('userManagement').style.display='block';
+  document.getElementById('siteSettings').style.display='none';
+  document.getElementById('contentManagement').style.display='none';
+  document.getElementById('quoteManagement').style.display='none';
+}
+
+function showSiteSettings(){
+  document.getElementById('adminDashboard').style.display='none';
+  document.getElementById('currencyManagement').style.display='none';
+  document.getElementById('orderManagement').style.display='none';
+  document.getElementById('userManagement').style.display='none';
+  document.getElementById('siteSettings').style.display='block';
+  document.getElementById('contentManagement').style.display='none';
+  document.getElementById('quoteManagement').style.display='none';
+  loadSiteSettings();
+}
+
+function showContentManagement(){
+  document.getElementById('adminDashboard').style.display='none';
+  document.getElementById('currencyManagement').style.display='none';
+  document.getElementById('orderManagement').style.display='none';
+  document.getElementById('userManagement').style.display='none';
+  document.getElementById('siteSettings').style.display='none';
+  document.getElementById('contentManagement').style.display='block';
+  document.getElementById('quoteManagement').style.display='none';
+  loadContentSettings();
+  loadPaymentMethods();
+}
+
+function showQuoteManagement(){
+  document.getElementById('adminDashboard').style.display='none';
+  document.getElementById('currencyManagement').style.display='none';
+  document.getElementById('orderManagement').style.display='none';
+  document.getElementById('userManagement').style.display='none';
+  document.getElementById('siteSettings').style.display='none';
+  document.getElementById('contentManagement').style.display='none';
+  document.getElementById('quoteManagement').style.display='block';
+  loadQuotes();
+}
+
+// ADMIN LOGIN/LOGOUT
+function checkAdmin(){
+  const email = document.getElementById('adminEmail').value.trim();
+  const pass = document.getElementById('adminPass').value.trim();
+  const rememberMe = document.getElementById('rememberMe').checked;
+
+  if(email === ADMIN_EMAIL && pass === ADMIN_PASSWORD){ 
+    document.getElementById('adminLogin').style.display="none"; 
+    showAdmin(); 
+
+    if (rememberMe) {
+      localStorage.setItem('adminLoggedIn', 'true');
+      localStorage.setItem('adminEmail', email);
+    } else {
+      sessionStorage.setItem('adminLoggedIn', 'true');
+    }
+  } else { 
+    alert("❌ Wrong Email or Password!"); 
+  }
+}
+
+function showAdmin(){ 
+  document.getElementById('adminArea').style.display='block'; 
+  showAdminDashboard();
+  loadSiteSettings();
+  loadCurrencies();
+  initNotificationSystem();
+}
+
+function logoutAdmin() {
+  document.getElementById('adminLogin').style.display="flex";
+  document.getElementById('adminArea').style.display='none';
+  
+  if (orderListener) {
+    orderListener();
+    orderListener = null;
+  }
+  
+  localStorage.removeItem('adminLoggedIn');
+  localStorage.removeItem('adminEmail');
+  sessionStorage.removeItem('adminLoggedIn');
+}
+
+// ON LOAD
+window.addEventListener('load', function(){
+  const isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true' || 
+                     sessionStorage.getItem('adminLoggedIn') === 'true';
+  
+  if (isLoggedIn) {
+    document.getElementById('adminLogin').style.display="none";
+    showAdmin();
+    
+    const savedEmail = localStorage.getItem('adminEmail');
+    if (savedEmail) {
+      document.getElementById('adminEmail').value = savedEmail;
+    }
+  } else {
+    document.getElementById('adminLogin').style.display="flex";
+  }
+  
+  // Initialize default notification settings
+  if (localStorage.getItem('notificationSound') === null) {
+    localStorage.setItem('notificationSound', 'true');
+    localStorage.setItem('soundVolume', '0.5');
+  }
+});
+</script>
+</body>
+</html>
