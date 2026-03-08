@@ -1788,7 +1788,7 @@ loadQuotes();
 }
 
 function showAnimationSettings(){
-document.getElementById('adminDashboard').style.display='none';
+document.getElementById('adminDashbd').style.display='none';
 document.getElementById('currencyManagement').style.display='none';
 document.getElementById('orderManagement').style.display='none';
 document.getElementById('userManagement').style.display='none';
@@ -1801,7 +1801,7 @@ loadAnimationSettings();
 
 // ADMIN LOGIN CHECK
 function checkAdmin(){
-const email = document.getElementById('adminemil').value.trim();
+const email = document.getElementById('adminemail').value.trim();
 const pass = document.getElementById('adminpass').value.trim();
 const rememberMe = document.getElementById('rememberMe').checked;
 
