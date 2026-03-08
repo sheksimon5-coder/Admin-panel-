@@ -1802,7 +1802,7 @@ loadAnimationSettings();
 // ADMIN LOGIN CHECK
 function checkAdmin(){
 const email = document.getElementById('adminEmail').value.trim();
-const pass = document.getElementById('adminPass').value.trim();
+const pass = document.getElementById('saimon1984').value.trim();
 const rememberMe = document.getElementById('rememberMe').checked;
 
 if(email === ADMIN_EMAIL && pass === ADMIN_PASSWORD){ 
