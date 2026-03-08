@@ -1801,7 +1801,7 @@ loadAnimationSettings();
 
 // ADMIN LOGIN CHECK
 function checkAdmin(){
-const email = document.getElementById('adminEmail').value.trim();
+const email = document.getElementById('sheksimon5@gmail.com').value.trim();
 const pass = document.getElementById('saimon1984').value.trim();
 const rememberMe = document.getElementById('rememberMe').checked;
 
