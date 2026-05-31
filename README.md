@@ -641,12 +641,12 @@ Mark as Featured
 <script>
 // Firebase Config
 const firebaseConfig = {
-apiKey: "AIzaSyB-eeLJ8lyib1ZaFiS13f9h3U3OhlCvMrE",
-authDomain: "dollar-exchange-bdt-fa179.firebaseapp.com",
-projectId: "dollar-exchange-bdt-fa179",
-storageBucket: "dollar-exchange-bdt-fa179.firebasestorage.app",
-messagingSenderId: "294819905234",
-appId: "1:294819905234:web:ea9ab6f91bc5a71140770b"
+apiKey: "AIzaSyAFJQagyxIPclky7MD1jFjR-NLXn7gsNds",
+authDomain: "farmer-a7448.firebaseapp.com",
+projectId: "farmer-a7448",
+storageBucket: "farmer-a7448.firebasestorage.app",
+messagingSenderId: "356604985350",
+appId: "1:356604985350:web:020ec67af82736ca060387"
 };
 
 // Initialize Firebase
