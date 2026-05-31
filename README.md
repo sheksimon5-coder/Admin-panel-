@@ -641,12 +641,12 @@ Mark as Featured
 <script>
 // Firebase Config
 const firebaseConfig = {
-apiKey: "AIzaSyCE57xIZr1igoPT7EkpDz0SIVYvFHle97U",
+apiKey: "AIzaSyB-eeLJ8lyib1ZaFiS13f9h3U3OhlCvMrE",
 authDomain: "dollar-exchange-bdt-fa179.firebaseapp.com",
 projectId: "dollar-exchange-bdt-fa179",
 storageBucket: "dollar-exchange-bdt-fa179.firebasestorage.app",
 messagingSenderId: "294819905234",
-appId: "1:294819905234:web:4da06ee71d54daeb40770b"
+appId: "1:294819905234:web:ea9ab6f91bc5a71140770b"
 };
 
 // Initialize Firebase
