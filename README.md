@@ -642,12 +642,13 @@ Mark as Featured
 // Firebase Config
 const firebaseConfig = {
 apiKey: "AIzaSyAIEGcuV2Os_rqKrpa1ioWy0l0iJI060QM",
-authDomain: "saimon-f4236.firebaseapp.com",
-projectId: "saimon-f4236",
-storageBucket: "saimon-f4236.firebasestorage.app",
-messagingSenderId: "93804376133",
-appId: "1:93804376133:web:38a83389901b4699b0732c"
-};
+  authDomain: "saimon-f4236.firebaseapp.com",
+  databaseURL: "https://saimon-f4236-default-rtdb.firebaseio.com",
+  projectId: "saimon-f4236",
+  storageBucket: "saimon-f4236.firebasestorage.app",
+  messagingSenderId: "93804376133",
+  appId: "1:93804376133:web:38a83389901b4699b0732c",
+  measurementId: "G-PXEMB3MSWZ"
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
