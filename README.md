@@ -641,12 +641,12 @@ Mark as Featured
 <script>
 // Firebase Config
 const firebaseConfig = {
-apiKey: "AIzaSyAFJQagyxIPclky7MD1jFjR-NLXn7gsNds",
-authDomain: "farmer-a7448.firebaseapp.com",
-projectId: "farmer-a7448",
-storageBucket: "farmer-a7448.firebasestorage.app",
-messagingSenderId: "356604985350",
-appId: "1:356604985350:web:020ec67af82736ca060387"
+apiKey: "AIzaSyAIEGcuV2Os_rqKrpa1ioWy0l0iJI060QM",
+authDomain: "saimon-f4236.firebaseapp.com",
+projectId: "saimon-f4236",
+storageBucket: "saimon-f4236.firebasestorage.app",
+messagingSenderId: "93804376133",
+appId: "1:93804376133:web:38a83389901b4699b0732c"
 };
 
 // Initialize Firebase
