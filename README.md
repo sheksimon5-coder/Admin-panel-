@@ -95,7 +95,7 @@ label{font-size:14px;font-weight:600}h2,h3,h4{margin-top:8px}
     </div>
     <div id="site-general" class="form-section active"><label>Site Status Message</label><input id="siteStatus" placeholder="Status message"><label>Site Name</label><input id="siteName" placeholder="Site Name"><label>Tagline</label><input id="siteTagline" placeholder="Tagline"><label class="toggle-row"><input type="checkbox" id="maintenanceMode"> Maintenance Mode</label><label>Maintenance Message</label><textarea id="maintenanceMessage" rows="3"></textarea></div>
     <div id="site-operations" class="form-section"><label>Working Hours (24-hour)</label><div class="control-row"><div><input id="workStartHour" type="number" min="0" max="23" placeholder="Start hour (9)"></div><div><input id="workEndHour" type="number" min="0" max="23" placeholder="End hour (22)"></div></div><label>Order Instructions</label><textarea id="orderInstructions" rows="3"></textarea><label class="toggle-row"><input type="checkbox" id="requireLogin"> Require Login for Orders</label></div>
-    <div id="site-contact" class="form-section"><label>WhatsApp Link</label><input id="whatsappLink" placeholder="https://wa.me/..."><label>Contact Email</label><input id="contactEmail" type="email"><label>Contact Phone</label><input id="contactPhone"></div>
+    <div id="site-contact" class="form-section"><label>WhatsApp Link</label><input id="whatsappLink" placeholder="https://wa.me/..."><label>WhatsApp Button Image URL</label><input id="whatsappImageUrl" placeholder="WhatsApp button image URL (optional)"><label>Contact Email</label><input id="contactEmail" type="email"><label>Contact Phone</label><input id="contactPhone"></div>
     <div id="site-fees" class="form-section"><label>Global Minimum Dollar Amount</label><input id="minDollarAmount" type="number" min="0" step="any"><label>Global Maximum Dollar Amount</label><input id="maxDollarAmount" type="number" min="0" step="any"><label>Transaction Fee (Fixed Tk)</label><input id="transactionFee" type="number" min="0" step="any"><label>Transaction Fee (%)</label><input id="transactionFeePercent" type="number" min="0" step="any"></div>
     <div id="site-ui" class="form-section"><label>Primary Color</label><input id="primaryColor" type="color" value="#0b75ff"><label>Secondary Color</label><input id="secondaryColor" type="color" value="#0037dd"><label>Logo URL</label><input id="logoUrl" placeholder="Logo URL"><label>Favicon URL</label><input id="faviconUrl" placeholder="Favicon URL"><label>Background Color</label><input id="backgroundColor" type="color" value="#f2f5f8"></div>
     <div id="site-status" class="form-section"><label class="toggle-row"><input type="checkbox" id="statusOverrideEnabled"> Enable Manual Status Override</label><div id="manualStatusControl" style="display:none"><label>Manual Status</label><select id="statusOverride"><option value="online">Force Online</option><option value="offline">Force Offline</option></select><p class="small">চালু থাকলে working hours উপেক্ষা করে ম্যানুয়াল স্ট্যাটাস দেখাবে।</p></div><p>Working Hours: <b id="previewHours">9:00 - 22:00</b></p><p>Manual Override: <b id="previewOverride">Disabled</b></p><p>Current Status: <span id="previewStatus" class="status-badge offline">Offline</span></p></div>
@@ -137,10 +137,9 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// ================= TELEGRAM NOTIFICATION SETTINGS =================
-// ⚠️ এখানে আপনার নিজের তথ্য বসান:
-const TELEGRAM_BOT_TOKEN = '8842406650:AAESk-VLFq7qwOT2i14SuRAqWDIhNkQ7GNc';  // যেমন: '1234567890AAHxxxxxxxxxxxx'
-const TELEGRAM_CHAT_ID   = '7427334644';    // যেমন: '12345689'
+// ================= TELEGRAM NOTIFICATION SETTINGS (সেটআপ সম্পন্ন ✔) =================
+const TELEGRAM_BOT_TOKEN = "8585021424:AAGsqk3Tsay2y3PZVolWE-rvUjre9h0u8HQ";
+const TELEGRAM_CHAT_ID   = "7427334644";
 // ===================================================================
 
 let knownOrderIds = new Set();
@@ -158,7 +157,7 @@ function startTelegramOrderListener(){
         if(change.type==='added' && !knownOrderIds.has(change.doc.id)){
           knownOrderIds.add(change.doc.id);
           const data = change.doc.data();
-          if(!data.telegramSent){ // ডাবল নোটিফিকেশন এড়াতে
+          if(!data.telegramSent){ // User Panel থেকে টেলিগ্রাম গেলে ডাবল পাঠাবে না
             sendTelegramOrderNotification({id:change.doc.id, ...data});
             db.collection('orders').doc(change.doc.id).update({telegramSent:true}).catch(()=>{});
           }
@@ -180,7 +179,7 @@ async function sendTelegramOrderNotification(order){
       `💵 পরিমাণ: ${order.dollar ?? "উল্লেখ নেই"} USD`,
       `💰 টাকা: ${order.taka ?? "উল্লেখ নেই"} TK`,
       `💱 কারেন্সি: ${order.currency || "উল্লেখ নেই"}`,
-      `💳 পেমেন্ট মাধ্যম: ${order.via || "উল্লেখ নেই"}`,
+      `💳 পেমেন্ট মাধ্যম: ${order.via || order.paymentMethod || "উল্লেখ নেই"}`,
       `🧾 TXID: ${order.trx || "উল্লেখ নেই"}`,
       `📌 স্ট্যাটাস: ${order.status || "Pending"}`,
     ].join("\n");
@@ -219,7 +218,7 @@ let quotes=[
 let siteSettings={
  status:'',name:'Dollar Exchange',tagline:'Fast & Secure Exchange',primaryColor:'#0b75ff',secondaryColor:'#0037dd',
  workStartHour:9,workEndHour:22,statusOverrideEnabled:false,statusOverride:'online',orderInstructions:'',
- whatsappLink:'https://wa.me/qr/DTBEJ472LPKOA1',contactEmail:'',contactPhone:'',
+ whatsappLink:'https://wa.me/qr/DTBEJ472LPKOA1',whatsappImageUrl:'',contactEmail:'',contactPhone:'',
  minDollarAmount:1,maxDollarAmount:1000,transactionFee:0,transactionFeePercent:0,
  logoUrl:'',faviconUrl:'',backgroundColor:'#f2f5f8',maintenanceMode:false,maintenanceMessage:'',requireLogin:false
 };
@@ -345,7 +344,7 @@ async function loadAdminOrders(){
   orders.forEach(o=>{
    const status=normalizeStatus(o.status),created=o.createdAt?new Date(o.createdAt).toLocaleString():'সময় দেওয়া নেই';
    const div=document.createElement('div');div.className='order-box';
-   div.innerHTML=`<div class="order-info"><b>${escapeHtml(o.name||'Unknown User')}</b> <span class="small">• ${escapeHtml(created)}</span><div class="small">নম্বর: ${escapeHtml(o.number||'—')} • ${escapeHtml(o.currency||'—')} • ${escapeHtml(o.dollar??'—')} USD → ${escapeHtml(o.taka??'—')} TK</div><div class="small">মাধ্যম: ${escapeHtml(o.via||'Not given')}</div><div class="small">TXID: ${escapeHtml(o.trx||'—')}</div><div class="small">Trade Type: ${escapeHtml(o.tradeType||'sell')}</div><p><span class="status ${statusClass(status)}">${status}</span></p></div><div class="order-actions"><button class="success" onclick="adminChangeStatus('${o.id}','COMPLETED')">Approve</button><button class="danger" onclick="adminChangeStatus('${o.id}','REJECTED')">Reject</button><button class="warning" onclick="adminChangeStatus('${o.id}','PENDING')">Pending</button></div>`;
+   div.innerHTML=`<div class="order-info"><b>${escapeHtml(o.name||'Unknown User')}</b> <span class="small">• ${escapeHtml(created)}</span><div class="small">নম্বর: ${escapeHtml(o.number||'—')} • ${escapeHtml(o.currency||'—')} • ${escapeHtml(o.dollar??'—')} USD → ${escapeHtml(o.taka??'—')} TK</div><div class="small">মাধ্যম: ${escapeHtml(o.via||o.paymentMethod||'Not given')}</div><div class="small">TXID: ${escapeHtml(o.trx||'—')}</div><div class="small">Trade Type: ${escapeHtml(o.tradeType||'sell')}</div><p><span class="status ${statusClass(status)}">${status}</span></p></div><div class="order-actions"><button class="success" onclick="adminChangeStatus('${o.id}','COMPLETED')">Approve</button><button class="danger" onclick="adminChangeStatus('${o.id}','REJECTED')">Reject</button><button class="warning" onclick="adminChangeStatus('${o.id}','PENDING')">Pending</button></div>`;
    out.appendChild(div);
   });
  }catch(e){console.error(e);out.innerHTML='<div class="order-empty">Orders load হয়নি। Firestore Rules/connection পরীক্ষা করুন।</div>';}finally{hideLoading();}
@@ -398,7 +397,7 @@ async function loadDashboard(){
 const siteFieldMap={
  status:'siteStatus',name:'siteName',tagline:'siteTagline',primaryColor:'primaryColor',secondaryColor:'secondaryColor',
  workStartHour:'workStartHour',workEndHour:'workEndHour',statusOverrideEnabled:'statusOverrideEnabled',statusOverride:'statusOverride',
- orderInstructions:'orderInstructions',whatsappLink:'whatsappLink',contactEmail:'contactEmail',contactPhone:'contactPhone',
+ orderInstructions:'orderInstructions',whatsappLink:'whatsappLink',whatsappImageUrl:'whatsappImageUrl',contactEmail:'contactEmail',contactPhone:'contactPhone',
  minDollarAmount:'minDollarAmount',maxDollarAmount:'maxDollarAmount',transactionFee:'transactionFee',transactionFeePercent:'transactionFeePercent',
  logoUrl:'logoUrl',faviconUrl:'faviconUrl',backgroundColor:'backgroundColor',maintenanceMode:'maintenanceMode',maintenanceMessage:'maintenanceMessage',requireLogin:'requireLogin'
 };
