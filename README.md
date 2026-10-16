@@ -138,7 +138,7 @@ if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 // ================= TELEGRAM NOTIFICATION SETTINGS (সেটআপ সম্পন্ন ✔) =================
-const TELEGRAM_BOT_TOKEN = "8585021424:AAGsqk3Tsay2y3PZVolWE-rvUjre9h0u8HQ";
+const TELEGRAM_BOT_TOKEN = "8842406650:AAESk-VLFq7qwOT2i14SuRAqWDIhNkQ7GNc";
 const TELEGRAM_CHAT_ID   = "7427334644";
 // ===================================================================
 
